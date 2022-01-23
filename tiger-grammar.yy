@@ -61,20 +61,25 @@ class tigerParseDriver;
 
 %start program;
 program: exp[main]	{ EM_debug("Got the main expression of our tiger program.", $main.AST->pos());
+		 			  if ($main.type != Ty_Int()) EM_error("Sorry, at this time, main expression must be an integer");
 		 			  driver.AST = new A_root_($main.AST);
 		 			}
 	;
 
 exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
+								  $$.type = Ty_Int();
 								  EM_debug("Got int " + str($i), $$.AST->pos());
 								}
 	| exp[exp1] PLUS exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_plusOp,  $exp1.AST,$exp2.AST);
+								  $$.type = Ty_Int();
 								  EM_debug("Got plus expression.", $$.AST->pos());
 								}
 	| exp[exp1] TIMES exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_timesOp, $exp1.AST,$exp2.AST);
+								  $$.type = Ty_Int();
 								  EM_debug("Got times expression.", $$.AST->pos());
+			  					}
 //
 // Note: In older compiler tools, instead of writing $exp1 and $exp2, we'd write $1 and $3,
 //        to refer to the first and third elements on the right-hand-side of the production.
@@ -85,7 +90,6 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 //        so we could use @exp1 to get it's information about the locations of exp1
 //        writing, e.g., Position::fromLex(@exp1) or instead of $exp1.AST->pos()
 //
-			  					}
 	;
 
 %%
