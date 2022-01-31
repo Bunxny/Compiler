@@ -25,16 +25,33 @@ class tigerParseDriver;
 #include "tigerParseDriver.h"
 %}
 
-%token END  0
-%token <bool> BOOL
-%token <int>  INT
-%token <std::string> ID
-%token <std::string> STRING
+// The line below means our grammar must not have conflicts
+//  (no conflicts means it is "an LALR(1) grammar",
+//   meaning it must be unambiguous and have some other properties).
+%expect 0
 
-// NOTE that bison complains if you have the same symbol listed as %token (above) and %type (below)
-//      so if you want to add attributes to a token, remove it from the list below
 
-%token 
+/******************************************************************/
+/***                                                            ***/
+/***                 TOKENS and NON-TERMINALS                   ***/
+/***                                                            ***/
+/******************************************************************/
+
+// We need to list TOKENS and NONTERMINALS, possibly giving TYPES for either one, and possibly giving PRECEDENCE
+// NOTE that bison complains if you have the same symbol listed as %token and %type, since the latter is used only for nonterminals.
+
+// In this file, I'll list the non-termials first, then their precedence relations, and then give the types of terminals
+
+/*****************************    TOKENS     **********************/
+
+// For my list of tokens, I'll give
+//    first, a specal case for END,
+//     then, all the un-attributed tokens like PLUS, LPAREN
+//   finaly, the tokens with attributes, such as INT and STRING
+
+%token END  0  /* this one is special, due to pre-defined interaction with flex */
+
+%token
   COMMA COLON SEMICOLON LPAREN RPAREN L_SQUARE_BRACKET R_SQUARE_BRACKET 
   L_CURLY_BRACE R_CURLY_BRACE
   ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END_LET OF 
@@ -43,19 +60,33 @@ class tigerParseDriver;
   PLUS MINUS TIMES DIVIDE ASSIGN EQ NEQ LT LE GT GE OR AND NOT
 ;
 
-/* precedence (stickiness) ... put the stickiest stuff at the bottom of the list */
+%token <bool> BOOL
+%token <int>  INT
+%token <std::string> ID
+%token <std::string> STRING
+
+// Next, the precedence rules; these can be from the list of tokens above,
+//  but with _ordered_sequence_ of %left/%right/%nonassoc steps,
+//  we define precedence (stickiness), with the "stickiest" (highest precedence) at the bottom of the list
 
 %left PLUS 
 %left TIMES
+
+
+
+/***************************** NON-TERMINALS **********************/
 
 /* Attributes types for nonterminals are next, e.g. struct's from tigerParseDriver.h */
 %type <expAttrs>  exp
 
 
-// The line below means our grammar must not have conflicts
-//  (no conflicts means it is "an LALR(1) grammar",
-//   meaning it must be unambiguous and have some other properties).
-%expect 0
+
+
+/******************************************************************/
+/***                                                            ***/
+/***    THE SECTION BELOW, AFTER %%, GIVES PRODUCTION RULES     ***/
+/***                                                            ***/
+/******************************************************************/
 
 
 %%
