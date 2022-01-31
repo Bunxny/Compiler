@@ -28,7 +28,8 @@ class tigerParseDriver;
 %token END  0
 %token <bool> BOOL
 %token <int>  INT
-%token <std::string> ID STRING
+%token <std::string> ID
+%token <std::string> STRING
 
 // NOTE that bison complains if you have the same symbol listed as %token (above) and %type (below)
 //      so if you want to add attributes to a token, remove it from the list below
