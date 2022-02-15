@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.1)
 project(tiger)
 
 set(CMAKE_CXX_STANDARD 20)
+#  :-(   this seems not to catch "overrode a function not marked as virtual", though C-Lion warns of it >:-(
+#  :-(      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Weverything")
+
 
 # Bison/Flex stuff documented here: https://cmake.org/cmake/help/v2.8.8/cmake.html#module:FindFLEX
 find_package(BISON)
