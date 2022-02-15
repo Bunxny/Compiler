@@ -28,24 +28,28 @@ string A_intExp_::HERA_code()
 }
 
 
-
-static string HERA_math_op(Position p, A_oper op) // needed for opExp
-{
-	switch (op) {
-	case A_plusOp:
-		return "ADD";
-	case A_timesOp:
-		return "MUL";	// was MULT for HERA 2.3
-	default:
-		EM_error("Unhandled case in HERA_math_op", false, p);
-		return "Oops_unhandled_hera_math_op";
-	}
-}
 string A_opExp_::HERA_code()
 {
-	string my_code = indent_math + (HERA_math_op(pos(), _oper) + "(" +
-					this->result_reg_s() + ", " +
-					_left->result_reg_s() + ", " +
-					_right->result_reg_s() + ")\n");
-	return _left->HERA_code() + _right->HERA_code() + my_code;
+    string leftCode  = _left->HERA_code();
+    string rightCode = _right->HERA_code();
+
+    string HERA_op;
+    if (this->_oper == A_plusOp) {
+        HERA_op = "ADD";
+    } else if (this->_oper == A_timesOp) {
+        HERA_op = "MUL";
+    } else {
+        EM_error("Unhandled case in HERA_math_op");
+        return "Oops_unhandled_hera_math_op";
+    }
+
+	string myCode = indent_math +
+	        (HERA_op + "(" +
+			    		this->result_reg_s() + ", " +
+				    	_left->result_reg_s() + ", " +
+					    _right->result_reg_s() + ")\n");
+
+    return leftCode + rightCode + myCode;
+	// Or, equivalently,
+	// return _left->HERA_code() + _right->HERA_code() + my_code;
 }

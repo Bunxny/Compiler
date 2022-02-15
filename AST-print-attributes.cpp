@@ -20,7 +20,7 @@ String AST_node_::attributes_for_printing()
 string A_exp_::attributes_for_printing()
 {
 	return (AST_node_::attributes_for_printing()
-		+ "my_reg() = " + str(result_reg()) + "; "
+		+ "result_reg() = " + str(result_reg()) + "; "
 		// concatenate any other EXP attributes here for printing
 		);
 }

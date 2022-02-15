@@ -249,13 +249,13 @@ public:
 	string result_reg_s() { // return in string form, e.g. "R2"
 		return "R" + std::to_string(this->result_reg());
 	}
-	virtual int init_result_reg();
 
 	// we'll need to print the register number attribute for exp's
 	virtual String attributes_for_printing();
 
 private:
 	int stored_result_reg = -1;  // Initialize to -1 to be sure it gets replaced by "if" in result_reg() above
+	virtual int init_result_reg();  // This should ONLY be called from "result_reg" above!
 };
 
 class A_root_ : public AST_node_ {
