@@ -195,7 +195,7 @@ extern bool print_ASTs_with_attributes;  // defaults to false; can be overridden
 
 class AST_node_ {  // abstract class with some common data
 public:
-	AST_node_(A_pos pos);
+	explicit AST_node_(A_pos pos);
 	virtual ~AST_node_();
 
 	A_pos pos() { return stored_pos; }
@@ -209,8 +209,8 @@ public:
 
 	virtual string print_rep(int indent, bool with_attributes) = 0;
 	virtual String attributes_for_printing();
-	string __repr__() { return this->print_rep(0, print_ASTs_with_attributes); }  // allow repr(x), which is more familiar to Python programmers ... see also util.h
-	string __str__()  { return this->__repr__(); }
+	string repr() { return this->print_rep(0, print_ASTs_with_attributes); }  // allow repr(x), which is more familiar to Python programmers ... see also util.h
+	string __str__()  { return this->repr(); }
 
 	// Shadow the default EM_error, etc., so that it automatically uses this->pos by default
 	void EM_error  (string message, bool fatal=false) {   ::EM_error(message, fatal, this->pos()); }

@@ -13,8 +13,8 @@ typedef std::string String;  // for compatibility with some old code
 
 
 string repr_for_std_string(const string &s);  // non-trivial; in util.cc (changes non-printing characters into \x##)
-template<class T> string repr(T *p)   { return p->__repr__(); }
-template<class T> string repr(T &x)   { return x.__repr__(); }
+template<class T> string repr(T *p)   { return p->repr(); }
+template<class T> string repr(T &x)   { return x.repr(); }
 // template<>        string repr(string &s) { return repr_for_std_string(s); }
 // template<>        string repr(string s) { return repr_for_std_string(s); }
 string repr(string s);
@@ -25,8 +25,8 @@ string repr(unsigned x);
 
 // figuring out template specialization, based in part on http://en.cppreference.com/w/cpp/language/template_specialization
 
-template<class T> string str(T *p)   { return p->__str__(); }
-template<class T> string str(T &x)   { return x.__str__(); }
+template<class T> string str(T *p)   { return p->str(); }
+template<class T> string str(T &x)   { return x.str(); }
 string str(bool b);
 string str(int x);
 string str(long x);
