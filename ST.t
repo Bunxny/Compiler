@@ -1,18 +1,19 @@
+/// todo: Some day, #include <hc_list.h>
+
 template <class symbol_info> struct ST_node {
-	ST_node(const ST<symbol_info> &r, const nametype &name, symbol_info *ip);
+	ST_node(const ST<symbol_info> &r, const name_type &name, symbol_info *ip);
 	ST<symbol_info> rest;
-	nametype n;
-	symbol_info *iptr;
+	name_type n;
+	symbol_info *iptr;  // Todo: make this a refcounted pointer, or do so in haverfordCS::list
 };
-template <class symbol_info> ST_node<symbol_info>::ST_node(const ST<symbol_info> &r, const nametype &name, symbol_info *ip) : rest(r), n(name), iptr(ip)
+template <class symbol_info> ST_node<symbol_info>::ST_node(const ST<symbol_info> &r, const name_type &name, symbol_info *ip) : rest(r), n(name), iptr(ip)
 {
+    // C++ usage note, for Java programmers
 	// The bit after the single ":" above initializes "n" with the value "name", etc.
 	// It's a lot like putting "n = name;" in the body,
 	//  but the latter would first build a null "n" and then re-define it,
-	//  and we don't want to assume that "nametype" allows null definition.
+	//  and we don't want to assume that "name_type" allows null definition.
 }
-
-
 
 
 
@@ -23,9 +24,21 @@ template <class symbol_info> ST<symbol_info>::ST()
 	head = 0;
 }
 
-template <class symbol_info> ST<symbol_info>::ST(const nametype &name, const symbol_info &info)
+template <class symbol_info> ST<symbol_info>::ST(const name_type &name, const symbol_info &info)
 {
 	head = new ST_node<symbol_info>(ST<symbol_info>(), name, new symbol_info(info));
+}
+template <class symbol_info> ST<symbol_info>::ST(std::pair<const name_type &, const symbol_info &> entry)
+{
+	head = new ST_node<symbol_info>(ST<symbol_info>(), entry.first, new symbol_info(entry.second));
+}
+
+template <class symbol_info> ST<symbol_info>::ST(std::list<std::pair<const name_type &, const symbol_info &>> entries)
+{
+    head = 0;
+    for (int entry: entries) {
+        *this = fuseOneScope(ST(entry), *this);
+    }
 }
 
 template <class symbol_info> ST<symbol_info> fuse(const ST<symbol_info> &s1, const ST<symbol_info> &s2)
@@ -38,13 +51,13 @@ template <class symbol_info> ST<symbol_info> merge(const ST<symbol_info> &inner,
 	return merge_or_fuse(inner, outer, true);
 }
 
-template <class symbol_info> bool is_name_there(const nametype &look_for_me, const ST<symbol_info> &in_this_table)
+template <class symbol_info> bool is_name_there(const name_type &look_for_me, const ST<symbol_info> &in_this_table)
 {
 	return in_this_table.check_for(look_for_me);
 }
 
 
-template <class symbol_info> symbol_info &lookup(const nametype &must_find_this, const ST<symbol_info> &in_this_table)
+template <class symbol_info> symbol_info &lookup(const name_type &must_find_this, const ST<symbol_info> &in_this_table)
 {
 	const ST_node<symbol_info> *it = in_this_table.check_for(must_find_this);
 	if (it == 0)
@@ -56,18 +69,18 @@ template <class symbol_info> symbol_info &lookup(const nametype &must_find_this,
 
 // STUFF FOR EXCEPTIONS
 
-template <class symbol_info> ST<symbol_info>::duplicate_symbol::duplicate_symbol(const nametype &n) : name(n)
+template <class symbol_info> ST<symbol_info>::duplicate_symbol::duplicate_symbol(const name_type &n) : name(n)
 {
 	// The bit after the single ":" above initializes "name" with the value "n".
 	// It's a lot like putting "name = n;" in the body,
 	//  but the latter would first build a null "name" and then re-define it,
-	//  and we don't want to assume that "nametype" allows null definition.
+	//  and we don't want to assume that "name_type" allows null definition.
 	// Note the use of "ST::duplicate_symbol::", because this
 	// 	error class is defined inside class ST.
 }
 
 
-template <class symbol_info> ST<symbol_info>::undefined_symbol::undefined_symbol(const nametype &n) : name(n)
+template <class symbol_info> ST<symbol_info>::undefined_symbol::undefined_symbol(const name_type &n) : name(n)
 {
 	// see body of "duplicate_symbol" constructor above
 }
@@ -103,7 +116,7 @@ template <class symbol_info> ST<symbol_info> merge_or_fuse(const ST<symbol_info>
 
 
 // check for "name", return ptr to its node or 0 if not there
-template <class symbol_info> const ST_node<symbol_info> *ST<symbol_info>::check_for(const nametype &name) const
+template <class symbol_info> const ST_node<symbol_info> *ST<symbol_info>::check_for(const name_type &name) const
 {
 	if (head == 0)
 		return 0;

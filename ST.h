@@ -16,29 +16,34 @@
 //  kind of symbol table in this compiler, the following works:
 
 #include "symbol.h"
-typedef Symbol nametype;  // This would let us change to using something other than Symbols (e.g. Strings) as names
-
+typedef Symbol name_type;  // This would let us change to using something other than Symbols (e.g. Strings) as names
+#include <list>  // std::list used for easy initialization
 
 // some pre-declarations keep G++ happy:
 template <class symbol_info> class ST;
 template <class symbol_info> class ST_node; // should be private to class ST, but this breaks g++
 
-template <class symbol_info> bool is_name_there(const nametype &look_for_me, const ST<symbol_info> &in_this_table);
-template <class symbol_info> symbol_info &lookup(const nametype &must_find_this, const ST<symbol_info> &in_this_table);
+template <class symbol_info> bool is_name_there(const name_type &look_for_me, const ST<symbol_info> &in_this_table);
+template <class symbol_info> symbol_info &lookup(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
 template <class symbol_info> ST<symbol_info> merge_or_fuse(const ST<symbol_info> &outer, const ST<symbol_info> &inner, bool merge_dups);
 
 
 
 template <class symbol_info> class ST {
 public:
-// Class ST has FOUR constructors, two classic C++ constructors,
-//  and also "fuse" and "merge":
+// Class ST has FIVE constructors, four classic C++ constructors,
+//  and also "merge":
 	
 	// make empty ST -- always works
 	ST();
-	// make 1-entry ST -- always works
-	ST(const nametype &name, const symbol_info &info);
-	// fuse and merge are listed below the class (they were friends, but G++ was getting sick from this)
+    // make 1-entry ST -- always works
+    ST(const name_type &name, const symbol_info &info);
+    // make 1-entry ST -- always works
+    explicit ST(std::pair<const name_type &, const symbol_info &>);
+	// make n-entry ST from a list of n name/info pairs --- requires that names be distinct
+	explicit ST(std::list<std::pair<const name_type &, const symbol_info &>>);
+
+	// fuse and merge are listed below the class
 	
 
 // Now the accessor  functions: is_name_there and lookup and to_String
@@ -50,7 +55,7 @@ public:
 	// is_name_there(look, ST(n, i))  	    === look == n
 	// is_name_there(look, fuse(T1, T2))	=== is_name_there(look, T1) || is_name_there(look, T2)
 	// is_name_there(look, merge(in, out))	=== is_name_there(look, in) || is_name_there(look, out)
- 	friend bool is_name_there<symbol_info>(const nametype &look_for_me, const ST<symbol_info> &in_this_table);
+ 	friend bool is_name_there<symbol_info>(const name_type &look_for_me, const ST<symbol_info> &in_this_table);
 
 
 	// check for name,
@@ -70,28 +75,28 @@ public:
 	//                                  or lookup(look, T2), otherwise
 	// lookup(look, merge(in, out))	===    lookup(look, in), if is_name_there(look, T1),
 	//                                  or lookup(look, out), otherwise
-	friend symbol_info &lookup<symbol_info>(const nametype &must_find_this, const ST<symbol_info> &in_this_table);
+	friend symbol_info &lookup<symbol_info>(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
 	string repr_method();
 	string str_method()  { return this->repr_method(); }
 	
 	class duplicate_symbol { // error type for exceptions
 	public:
-		nametype name;
-		duplicate_symbol(const nametype &n);
+		name_type name;
+		duplicate_symbol(const name_type &n);
 	};
 
 	class undefined_symbol {  // another exception type
 	public:
-		nametype name;
-		undefined_symbol(const nametype &n);
+		name_type name;
+		undefined_symbol(const name_type &n);
 	};
 
 private:
 	// DATA
-	ST_node<symbol_info> *head; // Null pointer for empty ST
+	ST_node<symbol_info> *head; // Null pointer means empty ST // Todo: make this a refcounted pointer
 
 	// A FEW PRIVATE OPERATIONS 
-	const ST_node<symbol_info> *check_for(const nametype &name) const;
+	const ST_node<symbol_info> *check_for(const name_type &name) const;
 
 	friend ST<symbol_info> merge_or_fuse<symbol_info>(const ST<symbol_info> &outer, const ST<symbol_info> &inner, bool merge_dups);
 };
@@ -106,7 +111,7 @@ template <class symbol_info> ST<symbol_info> fuse(const ST<symbol_info> &s1, con
 
 // Merge two tables for different scopes.
 //   The names in the first ST shadow those in the second ST
-//   Never complains (unless out of memory)
+//   Never complains about name conflicts, "inner" and "outer" can use the same name.
 // NOTE that this does not COPY any symbol_info structures -- they are all SHARED
 template <class symbol_info> ST<symbol_info> merge(const ST<symbol_info> &inner, const ST<symbol_info> &outer);
 
