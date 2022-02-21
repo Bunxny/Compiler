@@ -16,12 +16,12 @@ class Position {
 public:
 	// these are for style/clarity, just names for the constructors, in order of how likely they are to be used early
 	static Position current();  // what is the current state of the lexical scanner (Appel calls this EM_currentPos())
-	static Position range(const Position &start, const Position &end); // range from one positino to another
+	static Position range(const Position &start, const Position &end); // range from one position to another
 	static Position fromLex(ScannerPosition posAttributeInLex);        // convert from a "lex" token position
 	static Position undefined();                                       // what if there isn't one, e.g. AST_example()
 
-	string __repr__();
-	string __str__();
+	string repr_method();
+	string str_method();
 
 private: // actually, these are just 'discouraged' style; remove this line if you really want to call them rather than using the named static operations above
 	Position();

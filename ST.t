@@ -116,7 +116,7 @@ template <class symbol_info> const ST_node<symbol_info> *ST<symbol_info>::check_
 
 // PRINTING
 
-template <class symbol_info> string ST<symbol_info>::repr()
+template <class symbol_info> string ST<symbol_info>::repr_method()
 {
 	String result = "ST(";
 	ST_node<symbol_info> *h = this->head;

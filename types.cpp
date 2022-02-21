@@ -278,21 +278,21 @@ string to_String(Ty_ty t)
 		return "(*** WARNING --- NULL TYPE ***)";
 	}
 }
-string Ty_ty_::__repr__() { return to_String(this); }
+string Ty_ty_::repr() { return to_String(this); }
 
 string to_String(Ty_fieldList fl)
 {
 	list<Ty_ty> types_done;
 	return to_String_rec(fl, types_done);
 }
-string Ty_fieldList_::__str__() { return to_String(this); }
+string Ty_fieldList_::str() { return to_String(this); }
 
 string to_String(Ty_tyList tl)
 {
 	list<Ty_ty> types_done;
 	return to_String_rec(tl, types_done);
 }
-string Ty_tyList_::__str__() { return to_String(this); }
+string Ty_tyList_::str() { return to_String(this); }
 
 
 

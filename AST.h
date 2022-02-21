@@ -209,13 +209,13 @@ public:
 
 	virtual string print_rep(int indent, bool with_attributes) = 0;
 	virtual String attributes_for_printing();
-	string repr() { return this->print_rep(0, print_ASTs_with_attributes); }  // allow repr(x), which is more familiar to Python programmers ... see also util.h
-	string __str__()  { return this->repr(); }
+	string repr_method() { return this->print_rep(0, print_ASTs_with_attributes); }  // allow repr_method(x), which is more familiar to Python programmers ... see also util.h
+	string str_method()  { return this->repr_method(); }
 
 	// Shadow the default EM_error, etc., so that it automatically uses this->pos by default
 	void EM_error  (string message, bool fatal=false) {   ::EM_error(message, fatal, this->pos()); }
-	void EM_warning(string message, bool fatal=false) { ::EM_warning(message, this->pos()); }
-	void EM_debug  (string message, bool fatal=false) {   ::EM_debug(message, this->pos()); }
+	void EM_warning(string message) { ::EM_warning(message, this->pos()); }
+	void EM_debug  (string message) {   ::EM_debug(message, this->pos()); }
 
 	
 	// And now, the attributes that exist in ALL kinds of AST nodes.
@@ -237,7 +237,7 @@ private:
 
 class A_exp_ : public AST_node_ {
 public:
-	A_exp_(A_pos p);
+	explicit A_exp_(A_pos p);
 
 	// Attributes for all expressions: result_reg() is the register number to use;
 	//  in the first call, it is defined by the init_result_reg for the class,
@@ -251,7 +251,7 @@ public:
 	}
 
 	// we'll need to print the register number attribute for exp's
-	virtual String attributes_for_printing();
+	String attributes_for_printing() override;
 
 private:
 	int stored_result_reg = -1;  // Initialize to -1 to be sure it gets replaced by "if" in result_reg() above
@@ -260,15 +260,14 @@ private:
 
 class A_root_ : public AST_node_ {
 public:
-	A_root_(A_exp main_exp);
-	A_exp *main();
+	explicit A_root_(A_exp main_exp);
 
-	string HERA_code();
-	AST_node_ *parent();	// We should never call this
-	string print_rep(int indent, bool with_attributes);
+	string HERA_code() override;
+	AST_node_ *parent() override;	// We should never call this
+	string print_rep(int indent, bool with_attributes) override;
 
-	virtual void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent);  // should not be called, since it's in-line in the constructor
-	virtual int compute_depth();  // just for an example, not needed to compile
+	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // should not be called, since it's in-line in the constructor
+	int compute_depth() override;  // just for an example, not needed to compile
 private:
 
 	A_exp main_expr;
@@ -277,28 +276,28 @@ private:
 
 class A_literalExp_ : public A_exp_ {
 public:
-	A_literalExp_(A_pos p);
+	explicit A_literalExp_(A_pos p);
 };
 
 class A_leafExp_ : public A_literalExp_ {
 public:
-	A_leafExp_(A_pos p);
+	explicit A_leafExp_(A_pos p);
 
-	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent);  // this one's easy, by definition :-)
-	virtual int compute_height();  // just for an example, not needed to compile
+	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // this one's easy, by definition :-)
+	int compute_height() override;  // just for an example, not needed to compile
 };
 
 class A_nilExp_ : public A_leafExp_ {
 public:
-	A_nilExp_(A_pos p);
-	virtual string print_rep(int indent, bool with_attributes);
+	explicit A_nilExp_(A_pos p);
+	string print_rep(int indent, bool with_attributes) override;
 };
 
 
 class A_boolExp_ : public A_leafExp_ {
 public:
 	A_boolExp_(A_pos pos, bool b);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
   bool value;
 };
@@ -306,9 +305,9 @@ private:
 class A_intExp_ : public A_leafExp_ {
 public:
 	A_intExp_(A_pos pos, int i);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 
-	virtual string HERA_code();
+	string HERA_code() override;
 private:
 	int value;
 };
@@ -316,7 +315,7 @@ private:
 class A_stringExp_ : public A_leafExp_ {
 public:
 	A_stringExp_(A_pos pos, String s);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	String value;
 };
@@ -324,7 +323,7 @@ private:
 class A_recordExp_ : public A_literalExp_ {
 public:
 	A_recordExp_(A_pos pos, Symbol typ, A_efieldList fields);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _typ;
 	A_efieldList _fields;
@@ -333,7 +332,7 @@ private:
 class A_arrayExp_ : public A_literalExp_ {
 public:
 	A_arrayExp_(A_pos pos, Symbol typ, A_exp size, A_exp init);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _typ;
 	A_exp _size;
@@ -344,7 +343,7 @@ private:
 class A_varExp_ : public A_exp_ {
 public:
 	A_varExp_(A_pos pos, A_var var);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_var _var;
 };
@@ -355,11 +354,11 @@ typedef enum {A_plusOp, A_minusOp, A_timesOp, A_divideOp,
 class A_opExp_ : public A_exp_ {
 public:
 	A_opExp_(A_pos pos, A_oper oper, A_exp left, A_exp right);
-	virtual string print_rep(int indent, bool with_attributes);
-	virtual string HERA_code();
+	string print_rep(int indent, bool with_attributes) override;
+	string HERA_code() override;
 
-	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent);
-	virtual int compute_height();  // just for an example, not needed to compile
+	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
+	int compute_height() override;  // just for an example, not needed to compile
 private:
 	A_oper _oper;
 	A_exp _left;
@@ -369,7 +368,7 @@ private:
 class A_assignExp_ : public A_exp_ {
 public:
 	A_assignExp_(A_pos pos, A_var var, A_exp exp);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_var _var;
 	A_exp _exp;
@@ -378,7 +377,7 @@ private:
 class A_letExp_ : public A_exp_ {
 public:
 	A_letExp_(A_pos pos, A_decList decs, A_exp body);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_decList _decs;
 	A_exp _body;
@@ -387,7 +386,7 @@ private:
 class A_callExp_ : public A_exp_ {
 public:
 	A_callExp_(A_pos pos, Symbol func, A_expList args);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _func;
 	A_expList _args;
@@ -395,13 +394,13 @@ private:
 
 class A_controlExp_ : public A_exp_ {
 public:
-	A_controlExp_(A_pos p);
+	explicit A_controlExp_(A_pos p);
 };
 
 class A_ifExp_ : public A_controlExp_ {
 public:
 	A_ifExp_(A_pos pos, A_exp test, A_exp then, A_exp else_or_0_pointer_for_no_else);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_exp _test;
 	A_exp _then;
@@ -412,7 +411,7 @@ private:
 class A_forExp_ : public A_controlExp_ {
 public:
 	A_forExp_(A_pos pos, Symbol var, A_exp lo, A_exp hi, A_exp body);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _var;
 	A_exp _lo;
@@ -423,28 +422,28 @@ private:
 
 class A_breakExp_ : public A_controlExp_ {
 public:
-	A_breakExp_(A_pos p);
-	virtual string print_rep(int indent, bool with_attributes);
+	explicit A_breakExp_(A_pos p);
+	string print_rep(int indent, bool with_attributes) override;
 
 };
 
 class A_seqExp_ : public A_controlExp_ {
 public:
 	A_seqExp_(A_pos pos, A_expList seq);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_expList _seq;
 };
 
 class A_var_ : public AST_node_ {
 public:
-	A_var_(A_pos p);
+	explicit A_var_(A_pos p);
 };
 
 class A_simpleVar_ : public A_var_ {
 public:
 	A_simpleVar_(A_pos pos, Symbol sym);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _sym;
 };
@@ -452,7 +451,7 @@ private:
 class A_fieldVar_ : public A_var_ {
 public:
 	A_fieldVar_(A_pos pos, A_var var, Symbol sym);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_var _var;
 	Symbol _sym;
@@ -461,7 +460,7 @@ private:
 class A_subscriptVar_ : public A_var_ {
 public:
 	A_subscriptVar_(A_pos pos, A_var var, A_exp exp);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 
 private:
 	A_var _var;
@@ -472,7 +471,7 @@ private:
 class A_expList_ : public AST_node_ {
 public:
 	A_expList_(A_exp head, A_expList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 	int length();
 	A_exp _head;
 	A_expList _tail;
@@ -482,7 +481,7 @@ public:
 class A_efield_ : public AST_node_ {
 public:
 	A_efield_(Symbol name, A_exp exp);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 	String fieldname();
 private:
 	Symbol _name;
@@ -492,7 +491,7 @@ private:
 class A_efieldList_ : public AST_node_ {
 public:
 	A_efieldList_(A_efield head, A_efieldList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_efield _head;
 	A_efieldList _tail;
@@ -501,13 +500,13 @@ private:
 
 class A_dec_ : public AST_node_ {
 public:
-	A_dec_(A_pos p);
+	explicit A_dec_(A_pos p);
 };
 
 class A_decList_ : public A_dec_ {
 public:
 	A_decList_(A_dec head, A_decList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_dec _head;
 	A_decList _tail;
@@ -516,7 +515,7 @@ private:
 class A_varDec_ : public A_dec_ {
 public:
 	A_varDec_(A_pos pos, Symbol var, Symbol typ, A_exp init);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _var;
 	Symbol _typ;
@@ -531,7 +530,7 @@ private:
 class A_functionDec_: public A_dec_ {
 public:
 	A_functionDec_(A_pos pos, A_fundecList functions_that_might_call_each_other);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_fundecList theFunctions;
 };
@@ -539,7 +538,7 @@ private:
 class A_typeDec_: public A_dec_ {
 public:
 	A_typeDec_(A_pos pos, A_nametyList types_that_might_refer_to_each_other);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_nametyList theTypes;
 };
@@ -547,7 +546,7 @@ private:
 class A_fundec_ : public AST_node_ {  // possibly this would be happier as a subclass of "A_dec_"?
 public:
 	A_fundec_(A_pos pos, Symbol name, A_fieldList params, Symbol result_type,  A_exp body);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _name;
 	A_fieldList _params;
@@ -557,7 +556,7 @@ private:
 class A_fundecList_ : public AST_node_ {
 public:
 	A_fundecList_(A_fundec head, A_fundecList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_fundec _head;
 	A_fundecList _tail;
@@ -568,7 +567,7 @@ private:
 class A_namety_ : public AST_node_ {  // possibly this would be happier as a subclass of "A_dec_"?
 public:
 	A_namety_(A_pos pos, Symbol name, A_ty ty);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _name;
 	A_ty _ty;
@@ -576,7 +575,7 @@ private:
 class A_nametyList_ : public AST_node_ {   // possibly this would be happier as a subclass of "A_dec_"?
 public:
 	A_nametyList_(A_namety head, A_nametyList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_namety _head;
 	A_nametyList _tail;
@@ -590,7 +589,7 @@ private:
 class A_fieldList_ : public AST_node_ {
 public:
 	A_fieldList_(A_field head, A_fieldList tail);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_field _head;
 	A_fieldList _tail;
@@ -599,7 +598,7 @@ private:
 class A_field_ : public AST_node_ {
 public:
 	A_field_(A_pos pos, Symbol name, Symbol type_or_0_pointer_for_no_type_in_declaration);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _name;
 	Symbol _typ;
@@ -608,7 +607,7 @@ private:
 
 class A_ty_ : public AST_node_ {
 public:
-	A_ty_(A_pos p);
+	explicit A_ty_(A_pos p);
 };
 
 //  Using the name of a type to declare a variable with NameTy -- this is a use of a type
@@ -616,7 +615,7 @@ public:
 class A_nameTy_ : public A_ty_ {
 public:
 	A_nameTy_(A_pos pos, Symbol name);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _name;
 };
@@ -624,7 +623,7 @@ private:
 class A_recordty_ : public A_ty_ {
 public:
 	A_recordty_(A_pos pos, A_fieldList record);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	A_fieldList _record;
 };
@@ -632,7 +631,7 @@ private:
 class A_arrayty_ : public A_ty_ {
 public:
 	A_arrayty_(A_pos pos, Symbol array);
-	virtual string print_rep(int indent, bool with_attributes);
+	string print_rep(int indent, bool with_attributes) override;
 private:
 	Symbol _array;   // type of element in the array
 };

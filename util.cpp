@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
 	string example = util_example_string_chars_1_through_7f();
 
-	cout << "example.length() and repr(example) are: " << example.length() << " " << repr(example) << endl;
+	cout << "example.length() and repr(example) are: " << example.length() << " " << repr_method(example) << endl;
 	cout << "what happens if we just cout example?   " << example << endl;
 
 	string example_copy_paste_from_output = "\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037 !\042#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\134]^_`abcdefghijklmnopqrstuvwxyz{|}~\177";
@@ -95,8 +95,8 @@ string repr(int x)       { return std::to_string(x); }
 string repr(long x)      { return std::to_string(x); }
 string repr(unsigned x)  { return std::to_string(x); }
 
-// template<class T> string str(T *p)   { return p->__str__(); }
-// template<class T> string str(T &x)   { return x.__str__(); }
+// template<class T> string str(T *p)   { return p->str(); }
+// template<class T> string str(T &x)   { return x.str(); }
 string str(bool b) { return repr(b); }
 string str(int x)  { return repr(x); }
 string str(long x)  { return repr(x); }

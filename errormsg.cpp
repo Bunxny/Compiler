@@ -190,7 +190,7 @@ Position::Position(const Position &start, const Position &end)
 #include <sstream>
 #endif
 
-string Position::__str__()
+string Position::str_method()
 {
 #if USING_LOCATION_FROM_BISON
 	if (!undef) {
@@ -212,10 +212,10 @@ string Position::__str__()
 #endif
 }
 
-string Position::__repr__()
+string Position::repr_method()
 {
 #if USING_LOCATION_FROM_BISON
-	return "<Position corresponding to " + str(*this) + ">";
+	return "<Position corresponding to " + this->str_method() + ">";
 #else
 	return "Position::range(Position::fromLex(" + str(s) + "), Position::fromLex(" + str(e) + "))";
 #endif

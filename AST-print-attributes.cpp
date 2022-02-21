@@ -11,7 +11,7 @@
 String AST_node_::attributes_for_printing()
 {
 	return (string("")
-		+ ("pos = "            + str(stored_pos)      + "; ")
+		+ ("pos = " + str(stored_pos) + "; ")
 		// concatenate any other attributes here for printing
 		);
 }
@@ -20,7 +20,7 @@ String AST_node_::attributes_for_printing()
 string A_exp_::attributes_for_printing()
 {
 	return (AST_node_::attributes_for_printing()
-		+ "result_reg() = " + str(result_reg()) + "; "
+            + "result_reg() = " + str(result_reg()) + "; "
 		// concatenate any other EXP attributes here for printing
 		);
 }

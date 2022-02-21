@@ -24,7 +24,7 @@ string A_root_::HERA_code()
 
 string A_intExp_::HERA_code()
 {
-	return indent_math + "SET(" + result_reg_s() + ", " + str(value) +")\n";
+	return indent_math + "SET(" + result_reg_s() + ", " + str(value) + ")\n";
 }
 
 

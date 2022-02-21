@@ -18,8 +18,8 @@ public:
 	int pos;
 	int whatever_else;		
 
-	string __repr__();
-	string __str__();
+	string repr_method();
+	string str_method();
 
 };
 // make an abbreviation "ST_example" for a symbol table with the example sym info
@@ -42,13 +42,13 @@ example_sym_info::example_sym_info(int the_pos, int the_whatever_else) : pos(the
 		whatever_else = the_whatever_else;
 	}
 }
-string example_sym_info::__repr__()
+string example_sym_info::repr_method()
 {
-	return "position: "+repr(pos)+", whatever else: " + repr(whatever_else);
+	return "position: " + repr(pos) + ", whatever else: " + repr(whatever_else);
 }
-string example_sym_info::__str__()
+string example_sym_info::str_method()
 {
-	return this->__repr__();
+	return this->repr_method();
 }
 
 

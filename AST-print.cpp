@@ -128,17 +128,17 @@ String A_nilExp_::print_rep(int indent, bool with_attributes)
 }
 String A_boolExp_::print_rep(int indent, bool with_attributes)
 {
-	return "A_BoolExp(" + print_pos_rep(pos(), ", ") + repr(value) + (with_attributes?linebreak(indent+tab)+as_comment(attributes_for_printing()):"") + ")";
+	return "A_BoolExp(" + print_pos_rep(pos(), ", ") + repr(value) + (with_attributes ? linebreak(indent + tab) + as_comment(attributes_for_printing()) : "") + ")";
 }
 String A_intExp_::print_rep(int indent, bool with_attributes)
 {
-	return "A_IntExp(" + print_pos_rep(pos(), ", ") + repr(value) + (with_attributes?linebreak(indent+tab)+as_comment(attributes_for_printing()):"") + ")";
+	return "A_IntExp(" + print_pos_rep(pos(), ", ") + repr(value) + (with_attributes ? linebreak(indent + tab) + as_comment(attributes_for_printing()) : "") + ")";
 }
 String A_stringExp_::print_rep(int indent, bool with_attributes)
 {
 	return ("A_StringExp(" + print_pos_rep(pos(), ", ") +
-		repr(value) +
-		(with_attributes?linebreak(indent+tab)+as_comment(attributes_for_printing()):"") + ")");
+            repr(value) +
+            (with_attributes?linebreak(indent+tab)+as_comment(attributes_for_printing()):"") + ")");
 }
 String A_recordExp_::print_rep(int indent, bool with_attributes)
 {
