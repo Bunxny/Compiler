@@ -36,8 +36,8 @@ template <class symbol_info> ST<symbol_info>::ST(std::pair<const name_type &, co
 template <class symbol_info> ST<symbol_info>::ST(std::list<std::pair<const name_type &, const symbol_info &>> entries)
 {
     head = 0;
-    for (int entry: entries) {
-        *this = fuseOneScope(ST(entry), *this);
+    for (auto entry: entries) { // "auto" deduces type automatically
+        *this = FuseOneScope(ST(entry), *this);
     }
 }
 

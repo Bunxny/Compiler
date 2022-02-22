@@ -147,6 +147,7 @@ int main(int argc, char **argv)
 	// with compiler debugging ON if the "-d" flag was used when we started
 	EM_reset(filename, 8, debug, crash_on_fatal);
 
+	ST_examples();
 	ST_test();  // internal consistency check
 
 #if defined COMPILE_LEX_TEST

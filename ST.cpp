@@ -61,77 +61,73 @@ static int length(const char *c_style_string)
 }
 
 
-
+// call ST_examples from tiger.cpp, and run tiger with "-d", if you want to see these run.
 void ST_examples()
 {
 /*
   Show the symbol table calls that could be used for the tiger program
 
     let
-	var wombat : int := 14+6
+	var wombat : int := 20
 	var arthropod : int := 2
     in
 	(let
 	    var wombat : int := 35
 	 in
-	    arthropod := wombat+arthropod
+	    wombat+arthropod  // should be 35+2, i.e., 37
 	 end)
        +
 	(let
 	    var arthropod : int := 4
 	 in
-	    wombat/arthropod
+	    wombat/arthropod  // should be 20/4, i.e., 5
 	 end)
     end
 
-    In this example, we store as "sym info" the position and
-     (just to show something else being stored) length of the name.
+    In this example, we store as "sym info" the position and the integer values above.
 
-    Storing more useful things like type information would be done by
+    Storing more useful things (like, e.g., type information) would be done by
      creating a different type of sym_info
 
     Below, I need to_Symbol to turn names into type "Symbol";
-     this isn't necessary in the rest of the compiler,
-     since that's how variable names are stored already
+     this isn't always necessary in the rest of the compiler,
+     since that's how variable names are stored already in your AST.
 */
 
    // outside the outer let we'd have the standard library, e.g.
    ST_example outside_outer_let =
-     FuseOneScope(
-      			       ST_example(to_Symbol("print"),     example_sym_info(0,  length("print"))),
-			       FuseOneScope(
-      			         ST_example(to_Symbol("div"),     example_sym_info(0,  length("div"))),
-      			         ST_example(to_Symbol("mod"),     example_sym_info(0,  length("mod")))));
-			     // etc., etc,. etc.
+     ST_example( { std::pair(to_Symbol("print"),    example_sym_info(0,  0)),
+                   std::pair(to_Symbol("printint"), example_sym_info(0,  0)),
+                   std::pair(to_Symbol("div"),      example_sym_info(0,  0)),
+                   std::pair(to_Symbol("mod"),      example_sym_info(0,  0))
+                         // etc., etc,. etc.
+     } );
 
 
    // these might be computed along the outer let's "declist"
-   ST_example outer_let_first_dec  = ST_example(to_Symbol("wombat"),    example_sym_info(22, length("wombat")));
-   ST_example outer_let_second_dec = ST_example(to_Symbol("arthropod"), example_sym_info(32, length("arthropod")));
+   ST_example outer_let_decs  =
+     ST_example( { std::pair(to_Symbol("wombat"),    example_sym_info(22, 20)),
+                   std::pair(to_Symbol("arthropod"), example_sym_info(32, 2)) } );
 
-   // these might be computed in the outer let
-   ST_example outer_let_all_decs   = FuseOneScope(outer_let_first_dec, outer_let_second_dec);
-   ST_example avail_in_outer_let   = MergeAndShadow(outer_let_all_decs, outside_outer_let);
+   ST_example avail_in_outer_let   = MergeAndShadow(outer_let_decs, outside_outer_let);
 
    // and now, the inner let's...
 
-   ST_example first_inner_let_dec        = ST_example(to_Symbol("wombat"),    example_sym_info(64, length("wombat")));
-   ST_example first_inner_let_all_decs   = first_inner_let_dec;
+   ST_example first_inner_let_decs       = ST_example(to_Symbol("wombat"),    example_sym_info(64, 35));
+   ST_example avail_in_first_inner_let   = MergeAndShadow(first_inner_let_decs, avail_in_outer_let);
 
-   ST_example avail_in_first_inner_let   = MergeAndShadow(first_inner_let_all_decs, avail_in_outer_let);
-
-   EM_debug("Symbols available in sum node in example:\n" + str(avail_in_first_inner_let));
-   EM_debug("Lookup of 'wombat' here produces: " + str(lookup(to_Symbol("wombat"), avail_in_first_inner_let)));
+   EM_debug("Symbols available in 'wombat + arthropod' node:\n" + str(avail_in_first_inner_let));
+   EM_debug("Lookup of 'wombat'    here produces: " + str(lookup(to_Symbol("wombat"), avail_in_first_inner_let)));
    EM_debug("Lookup of 'arthropod' here produces: " + str(lookup(to_Symbol("arthropod"), avail_in_first_inner_let)));
 
 
-   ST_example second_inner_let_dec       = ST_example(to_Symbol("arthropod"), example_sym_info(124, length("wombat")));
-   ST_example second_inner_let_all_decs  = second_inner_let_dec;
+   ST_example second_inner_let_decs       = ST_example(to_Symbol("arthropod"), example_sym_info(124, 4));
 
-   ST_example avail_in_second_inner_let  = MergeAndShadow(second_inner_let_all_decs, avail_in_outer_let);
 
-   EM_debug("Symbols available in division node in example:\n" + str(avail_in_second_inner_let));
-   EM_debug("Lookup of 'wombat' here produces: " + str(lookup(to_Symbol("wombat"), avail_in_second_inner_let)));
+   ST_example avail_in_second_inner_let  = MergeAndShadow(second_inner_let_decs, avail_in_outer_let);
+
+   EM_debug("Symbols available in 'wombat / arthropod' node:\n" + str(avail_in_second_inner_let));
+   EM_debug("Lookup of 'wombat'    here produces: " + str(lookup(to_Symbol("wombat"), avail_in_second_inner_let)));
    EM_debug("Lookup of 'arthropod' here produces: " + str(lookup(to_Symbol("arthropod"), avail_in_second_inner_let)));
 
    try {
@@ -139,12 +135,12 @@ void ST_examples()
 	   lookup(to_Symbol("C. Elegans"), avail_in_first_inner_let);
 	   EM_debug("... that's strange, we should have thrown an exception!");
    }
-   catch(ST_example::undefined_symbol missing) {
+   catch(const ST_example::undefined_symbol &missing) {
 	   EM_debug("... and sure enough, there was a problem with missing symbol named " + str(missing.name));
    }
 }
 
-void ST_test()
+void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since it's testing error cases.
 {
 	try {
 		// empty ST
