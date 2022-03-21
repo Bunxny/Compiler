@@ -153,7 +153,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Pat"), t1);
 			assert(false && "lookup should have failed above");
 		}
-		catch(ST_example::undefined_symbol missing) {
+		catch(const ST_example::undefined_symbol &missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
@@ -161,7 +161,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Dave"), t0);
 			assert(false && "lookup should have failed above");
 		}
-		catch(ST_example::undefined_symbol missing) {
+		catch(const ST_example::undefined_symbol &missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Dave")));
 		}
 
@@ -170,7 +170,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			fuse(t1, ST_example(to_Symbol("Dave"), example_sym_info(15, 0)));
 			assert(false && "fuse should have failed above");
 		}
-		catch(ST_example::duplicate_symbol dup) {
+		catch(const ST_example::undefined_symbol &dup) {
 			assert(Symbols_are_equal(to_Symbol("Dave"), dup.name));
 		}
 
@@ -185,7 +185,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Pat"), t1);
 			assert(false && "lookup should have failed above");
 		}
-		catch(ST_example::undefined_symbol missing) {
+		catch(const ST_example::undefined_symbol & missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
@@ -212,7 +212,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			fuse(t12, t342a);
 			assert(false && "fuse should have failed above");
 		}
-		catch(ST_example::duplicate_symbol dup) {
+		catch(const ST_example::undefined_symbol &dup) {
 			assert(Symbols_are_equal(to_Symbol("Pat"), dup.name));
 		}
 

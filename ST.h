@@ -7,7 +7,7 @@
 //  Create null or 1-element ST's with constructor.
 //  "Fuse" (a.k.a. FuseOneScope) combines disjoint ST's (for dec's in same scope).
 //  "Merge" (a.k.a. MergeAndShadow) combines ST's from different scopes
-//	merge(outer,inner) has symbols from "inner" shadow those of "outer".
+//	merge(inner,outer) has symbols from "inner" shadow those of "outer".
 // For details & sample uses of operations, see test_ST in ST.c.
 
 
@@ -25,7 +25,7 @@ template <class symbol_info> class ST_node; // should be private to class ST, bu
 
 template <class symbol_info> bool is_name_there(const name_type &look_for_me, const ST<symbol_info> &in_this_table);
 template <class symbol_info> symbol_info &lookup(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
-template <class symbol_info> ST<symbol_info> merge_or_fuse(const ST<symbol_info> &outer, const ST<symbol_info> &inner, bool merge_dups);
+template <class symbol_info> ST<symbol_info> merge_or_fuse(const ST<symbol_info> &inner, const ST<symbol_info> &outer, bool merge_dups);
 
 
 
@@ -98,7 +98,7 @@ private:
 	// A FEW PRIVATE OPERATIONS 
 	const ST_node<symbol_info> *check_for(const name_type &name) const;
 
-	friend ST<symbol_info> merge_or_fuse<symbol_info>(const ST<symbol_info> &outer, const ST<symbol_info> &inner, bool merge_dups);
+	friend ST<symbol_info> merge_or_fuse<symbol_info>(const ST<symbol_info> &inner, const ST<symbol_info> &outer, bool merge_dups);
 };
 
 // Build a "single-scope" Symbol Table from 2 single-scope tables.
