@@ -87,6 +87,9 @@ int tigerParseDriver::parse (const std::string &f)
 /* Not using these: batch debug noinput */
 
 
+/* NOTE: DO NOT allow a leading "-" in the rule below for negative numbers,
+   since then 2-1 looks like two integers side-by-side, not a subtraction */
+   
 integer	[0-9]+
 
 /* real numbers don't occur in tiger, but if they did,
