@@ -20,25 +20,26 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 #   but, note I added CMAKE_CURRENT_SOURCE_DIR to the above
    
 add_executable(tiger
-  ${BISON_TigerParser_OUTPUTS}
-  ${FLEX_TigerScanner_OUTPUTS}
-  AST
-  AST-print-attributes
-  AST-print
-  depth
-  errormsg
-  height
-  HERA_code
-  layout_frames
-  parent
-  result_reg
-  static_checks
-  ST
-  tiger
-  tigerParseDriver
-  typecheck
-  types
-  util
+        ${BISON_TigerParser_OUTPUTS}
+        ${FLEX_TigerScanner_OUTPUTS}
+        AST
+        AST-print-attributes
+        AST-print
+        depth
+        errormsg
+        height
+        HERA_code
+        layout_frames
+        lazy
+        parent
+        result_reg
+        static_checks
+        ST
+        tiger
+        tigerParseDriver
+        typecheck
+        types
+        util
 )
 
 include_directories(/home/courses/include ../HaverfordCS/include)

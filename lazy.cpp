@@ -9,19 +9,20 @@
 #include "lazy.h"
 #if defined LAZY_TEST_MAIN && LAZY_TEST_MAIN
 #define verbose 1
+#define explode 1
 int main() {
 	lazy_test();
 }
 #else
-#define verbose 1
+#define verbose 0
+#define explode 0
 #endif
 
 
-#if verbose
 #include <iostream>
 using std::cout;
+using std::cerr;
 using std::endl;
-#endif
 
 // return n, very slowly if some options are chosen
 enum slowness { quick, exponential, infinite };
@@ -48,16 +49,27 @@ int lazy_test_slowness(int n, slowness how_slow)
     }
 }
 
-void lazy_test()
+bool lazy_test()
 {
     // for loop notation from https://stackoverflow.com/questions/12702561/iterate-through-a-c-vector-using-a-for-loop
     // vector initialization from https://stackoverflow.com/questions/2236197/what-is-the-easiest-way-to-initialize-a-stdvector-with-hardcoded-elements
-    for (slowness slow: std::vector<slowness> { quick, exponential, infinite })  // all speed options
-	for (int n=3; n<=9; n+=2) {                                              // three sample sizes
+    bool ok=true;
+    std::vector<slowness> choices=
+#if explode
+	{ quick, exponential, infinite };
+#else
+	{ quick, exponential };
+#endif
+    for (slowness slow: choices)     // all speed options
+	for (int n=3; n<=9; n+=3) {  // three sample sizes
 #if verbose
 	    cout << "\n\n   *** calling lazy_test_slowness(" << n << ", " << slow << ")" << endl;
 #endif
-	    lazy_test_slowness(n, slow);
+	    if (lazy_test_slowness(n, slow) != n) {
+		cerr << "lazy_test in lazy.cpp: inconsistency found for n=" << n << " and approach/version=" << slow << endl;
+		ok=false;
+	    }
 	}
+    return ok;
 }
 

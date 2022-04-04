@@ -9,6 +9,8 @@ using std::endl;
 #include "ST.h"  /* to run ST_test */
 #include "tigerParseDriver.h"
 
+#include "lazy.h"   // allow self-test of lazy-evaluation system
+
 /* Turned this off while having trouble switching to C++ approach; this used to work in C version */
 #if defined COMPILE_LEX_TEST
 // array of token number / token name pairs
@@ -147,8 +149,11 @@ int main(int argc, char **argv)
 	// with compiler debugging ON if the "-d" flag was used when we started
 	EM_reset(filename, 8, debug, crash_on_fatal);
 
-	ST_examples();
-	ST_test();  // internal consistency check
+	EM_debug("Beginning self-test of modules, feel free to comment out these steps if confident.");
+	ST_examples(); // confirm examples work
+	ST_test();     // internal consistency check
+	lazy_test();   // internal consistency check of lazy-evaluation system
+	EM_debug("Completed self-test of modules; if no errors/warnings, yay.");
 
 #if defined COMPILE_LEX_TEST
 	if (just_do_lex_and_then_stop) {

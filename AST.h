@@ -161,6 +161,7 @@
 typedef Position A_pos;
 #include "symbol.h"
 #include "types.h"  // we'll need this for attributes
+#include "lazy.h"   // useful if we want lazy evaluation for attributes
 
 
 void AST_examples();  // Examples, to help understand what't going on here ... see AST.cc

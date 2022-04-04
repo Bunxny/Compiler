@@ -47,5 +47,5 @@ private:
 /* #include the template instantiation here, since most C++ compilers require that we do so */
 #include "lazy.t"
 
-void lazy_test();  // self-test to confirm it works; also, a demo of sorts
+bool lazy_test();  // self-test to confirm it works; also, a demo of sorts ... cerr some complaints and return false if a problem
 #endif
