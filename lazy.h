@@ -12,7 +12,7 @@
  * WARNING: the "cyclic_definition" exception contains a reference to the lazy variable that wasn't ready,
  *	    which could be a problem if lazy variables are used as local variables and the exception
  *	    propogates past the scope of the local. This should not be a problem for data fields
- *	    of AST nodes in CS340
+ *	    of AST nodes in CS350.
  */
 
 #include <functional>
@@ -44,7 +44,8 @@ private:
 };
 
 
-/* #include the template instantiation here, since most C++ compliers require that we do so */
+/* #include the template instantiation here, since most C++ compilers require that we do so */
 #include "lazy.t"
 
+void lazy_test();  // self-test to confirm it works; also, a demo of sorts
 #endif

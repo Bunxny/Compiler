@@ -1,9 +1,9 @@
 /*
  * Implementation file for templated lazy variable class.
  *
- *  Since most C++ compilers reqire that the implementation of templated code be #inlude'd rather than compiled separately,
+ *  Since most C++ compilers reqire that the implementation of templated code be #include'd rather than compiled separately,
  *  I've put it in this ".t" file, which I #include from the ".h" file to avoid visual clutter there,
- *  rather than putting it in a separate ".cc" file that includes lazy.h.
+ *  rather than putting it in a separate ".cpp" file that includes lazy.h.
  */
 
 template <class T> lazy<T>::lazy(std::function<T ()> init_function)
