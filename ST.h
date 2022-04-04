@@ -27,7 +27,17 @@ template <class symbol_info> bool is_name_there(const name_type &look_for_me, co
 template <class symbol_info> symbol_info &lookup(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
 template <class symbol_info> ST<symbol_info> merge_or_fuse(const ST<symbol_info> &inner, const ST<symbol_info> &outer, bool merge_dups);
 
+class duplicate_symbol { // error type for exceptions
+public:
+    name_type name;
+    duplicate_symbol(const name_type &n) : name(n) { }
+};
 
+class undefined_symbol {  // another exception type
+public:
+    name_type name;
+    undefined_symbol(const name_type &n) : name (n) { }
+};
 
 template <class symbol_info> class ST {
 public:
@@ -78,18 +88,6 @@ public:
 	friend symbol_info &lookup<symbol_info>(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
 	string repr_method();
 	string str_method()  { return this->repr_method(); }
-	
-	class duplicate_symbol { // error type for exceptions
-	public:
-		name_type name;
-		duplicate_symbol(const name_type &n);
-	};
-
-	class undefined_symbol {  // another exception type
-	public:
-		name_type name;
-		undefined_symbol(const name_type &n);
-	};
 
 private:
 	// DATA

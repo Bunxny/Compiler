@@ -3,7 +3,7 @@
 #include "ST.h"
 
 
-/* Note that this is just some examples, since most C++ compilers require that the implementation of template functions be #included and thus I put it in ST.t */
+/* Note that this is mostly some examples, since most C++ compilers require that the implementation of template functions be #included and thus I put it in ST.t */
 
 // NOTE: Normally this 'struct' would be in a .h file, but we only need it within ST.cc, for examples,
 //       so I'm putting it here.
@@ -135,7 +135,7 @@ void ST_examples()
 	   lookup(to_Symbol("C. Elegans"), avail_in_first_inner_let);
 	   EM_debug("... that's strange, we should have thrown an exception!");
    }
-   catch(const ST_example::undefined_symbol &missing) {
+   catch(const undefined_symbol &missing) {
 	   EM_debug("... and sure enough, there was a problem with missing symbol named " + str(missing.name));
    }
 }
@@ -153,7 +153,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Pat"), t1);
 			assert(false && "lookup should have failed above");
 		}
-		catch(const ST_example::undefined_symbol &missing) {
+		catch(const undefined_symbol &missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
@@ -161,7 +161,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Dave"), t0);
 			assert(false && "lookup should have failed above");
 		}
-		catch(const ST_example::undefined_symbol &missing) {
+		catch(const undefined_symbol &missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Dave")));
 		}
 
@@ -170,7 +170,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			fuse(t1, ST_example(to_Symbol("Dave"), example_sym_info(15, 0)));
 			assert(false && "fuse should have failed above");
 		}
-		catch(const ST_example::undefined_symbol &dup) {
+		catch(const undefined_symbol &dup) {
 			assert(Symbols_are_equal(to_Symbol("Dave"), dup.name));
 		}
 
@@ -185,7 +185,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			lookup(to_Symbol("Pat"), t1);
 			assert(false && "lookup should have failed above");
 		}
-		catch(const ST_example::undefined_symbol & missing) {
+		catch(const undefined_symbol & missing) {
 			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
@@ -212,7 +212,7 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 			fuse(t12, t342a);
 			assert(false && "fuse should have failed above");
 		}
-		catch(const ST_example::undefined_symbol &dup) {
+		catch(const undefined_symbol &dup) {
 			assert(Symbols_are_equal(to_Symbol("Pat"), dup.name));
 		}
 
@@ -232,9 +232,9 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 
 
 // IMPLEMENTATION
+//  AS noted above, most implementation is in the ST.t file
 
-
-// For now, a symbol table can just be a list
+// Note that, for now, a symbol table can just be a list
 // In fact, we can ensure that the symbols at the outer scope
 //   are always further along in the list, so if we just find
 //   the first symbol with the given name, it will be the one

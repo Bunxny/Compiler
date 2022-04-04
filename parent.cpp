@@ -9,7 +9,7 @@ void A_root_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent
 {
 	// This has been inlined into the root expression constructor,
 	//   so it shouldn't actually be needed again...
-	EM_error("Strange ... called set_parent_pointers_for_me_and_my_descendants for A_root, rather than relying on constructor");
+	EM_warning("Strange ... called set_parent_pointers_for_me_and_my_descendants for A_root, rather than relying on constructor");
 	// otherwise, we would have done this:
 	// assert(my_parent_or_null_if_i_am_the_root == 0);
 	// stored_parent = my_parent_or_null_if_i_am_the_root;

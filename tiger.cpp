@@ -106,97 +106,104 @@ void lex_test()
 
 int main(int argc, char **argv)
 {
-  try {
-	bool debug = false, show_ast = false, crash_on_fatal;
+    try {
+        bool debug = false, show_ast = false, crash_on_fatal;
 #if defined COMPILE_LEX_TEST
-	bool just_do_lex_and_then_stop = false;
+        bool just_do_lex_and_then_stop = false;
 #endif
-	String filename;
-	int arg_consumed = 0;
-  
-	if (argc>arg_consumed+1 && string(argv[1]).length()>= 2 && (argv[1][0] == '-' && argv[1][1] == 'd')) { // Debug option
-		arg_consumed++;
-		debug = true;
-		if (string(argv[1]).length()>= 3 && argv[1][2] == 'a')
-			show_ast = true;
-		else if (string(argv[1]).length()>= 3 && argv[1][2] == 'A')
-			print_ASTs_with_attributes = show_ast = true;
-		else if (string(argv[1]).length()>= 3 && argv[1][2] == 'c')
-			crash_on_fatal = true;
+        String filename;
+        int arg_consumed = 0;
+
+        if (argc>arg_consumed+1 && string(argv[1]).length()>= 2 && (argv[1][0] == '-' && argv[1][1] == 'd')) { // Debug option
+            arg_consumed++;
+            debug = true;
+            if (string(argv[1]).length()>= 3 && argv[1][2] == 'a')
+                show_ast = true;
+            else if (string(argv[1]).length()>= 3 && argv[1][2] == 'A')
+                print_ASTs_with_attributes = show_ast = true;
+            else if (string(argv[1]).length()>= 3 && argv[1][2] == 'c')
+                crash_on_fatal = true;
 #if defined COMPILE_LEX_TEST
-		else if (string(argv[1]).length()>= 3 && argv[1][2] == 'l')
-			just_do_lex_and_then_stop = true;
+            else if (string(argv[1]).length()>= 3 && argv[1][2] == 'l')
+                just_do_lex_and_then_stop = true;
 #endif
-	}
+        }
 
+        if (argc>arg_consumed+1)
+        {
+            arg_consumed++;
+            filename = argv[arg_consumed];
+        } else {
+            cout << "Enter name of file to be compiled (or - for standard input) ";
+            // read from stdin to avoid confusing stdin/cin
+            char buf[1024];
+            scanf("%s", buf);
+            filename = buf;
+        }
 
-	if (argc>arg_consumed+1)
-	{
-		arg_consumed++;
-		filename = argv[arg_consumed];
-	}
-	else
-	{
-		cout << "Enter name of file to be compiled (or - for standard input) ";
-		// read from stdin to avoid confusing stdin/cin
-		char buf[1024];
-		scanf("%s", buf);
-		filename = buf;
-	}
+        // open "filename" for reading by lexical scanner,
+        // give up after 8 errors,
+        // with compiler debugging ON if the "-d" flag was used when we started
+        EM_reset(filename, 8, debug, crash_on_fatal);
 
-	// open "filename" for reading by lexical scanner,
-	// give up after 8 errors,
-	// with compiler debugging ON if the "-d" flag was used when we started
-	EM_reset(filename, 8, debug, crash_on_fatal);
-
-	EM_debug("Beginning self-test of modules, feel free to comment out these steps if confident.");
-	ST_examples(); // confirm examples work
-	ST_test();     // internal consistency check
-	lazy_test();   // internal consistency check of lazy-evaluation system
-	EM_debug("Completed self-test of modules; if no errors/warnings, yay.");
+        EM_debug("Beginning self-test of modules, feel free to comment out these steps if confident.");
+        ST_examples(); // confirm examples work
+        ST_test();     // internal consistency check
+        lazy_test();   // internal consistency check of lazy-evaluation system
+        EM_debug("Completed self-test of modules; if no errors/warnings, yay.");
 
 #if defined COMPILE_LEX_TEST
-	if (just_do_lex_and_then_stop) {
-		lex_test();
-		return 0;
-	} else
+        if (just_do_lex_and_then_stop) {
+            lex_test();
+            return 0;
+        } else
 #endif
-	{
-		tigerParseDriver driver;
-		int result = driver.parse(filename);
-		if (!EM_recorded_any_errors()) {
-			if (result != 0) {
-				EM_error("Strange result in tiger.cc: parser failed but EM module reported no errors",
-					 true, Position::undefined()); // true = fatal error
-			}
 
-			EM_debug("Parsing Successful", driver.AST->pos());
+        // This is kind of a strange use of "while",
+        //  but I want a structure in which I run a bunch of lines in order,
+        //  once each, but can "break" the sequence at any point.
+        // In C++, I have to use "goto", or make a one-trip loop and use "break".
 
+        while (true) {  // always "break" or return, to get out of this one-trip loop
+            tigerParseDriver driver;
+            int result = driver.parse(filename);
+            if (EM_recorded_any_errors()) break;
+            if (result != 0) {
+                EM_error("Strange result in tiger.cc: parser failed but EM module reported no errors");
+                break;
+            }
+            EM_debug("Parsing Successful", driver.AST->pos());
 
-			// Could do static checks, e.g. type checking, here if we want to do them all before any code generation
+            driver.AST->set_parent_pointers_for_me_and_my_descendants(0);  // now we can traverse up or down
 
-			if (show_ast) cerr << "Printing AST due to -da or -dA flag:" << endl << repr(driver.AST) << endl;
+            // Can do static checks, e.g. type checking, here if we want to do them all before any code generation
+            if (show_ast)
+                EM_debug("Printing AST due to -da or -dA flag:\n" + repr(driver.AST) + "\n");
+            if (EM_recorded_any_errors()) break; // could detect errors while computing attributes to print them
 
-			if (! EM_recorded_any_errors()) {
-				String code = driver.AST->HERA_code();
-				if (! EM_recorded_any_errors()) {
-					cout << code;
-					return 0; // no errors
-				}
-			}
-		}
-		EM_warning("Not generating HERA code due to above errors.");
-		return EM_recorded_any_errors(); // got errors somewhere, or would have returned 0 above
-	}
+            String code = driver.AST->HERA_code();
+            if (EM_recorded_any_errors()) break;
 
-  } catch (const char *message) {
-	  cerr << "Compiler exception (this should not happen): " << message << endl;
-	  return 4;
-  } catch (std::string message) {
-	  cerr << "Compiler exception (this should not happen): " << message << endl;
-	  return 4;
-  } catch (...) {
-	  cerr << "Yikes! Uncaught compiler exception (this REALLY should not happen)" << endl;
-	  return 66;
-  }
+            cout << code;
+            return 0; // no errors
+        }
+        EM_warning("Not generating HERA code due to above errors.");
+        return EM_recorded_any_errors(); // got errors somewhere, or would have returned 0 above
+
+    } catch (const char *message) {
+        cerr << "Compiler exception (this should not happen): " << message << endl;
+        return 4;
+    } catch (const std::string message) {
+        cerr << "Compiler exception (this should not happen): " << message << endl;
+        return 4;
+    }  catch (const duplicate_symbol &d) {
+        cerr << "Compiler exception due to duplicate symbol error not caught elsewhere." << endl;
+        return 5;
+    }  catch (const undefined_symbol &u) {
+        cerr << "Compiler exception due to undefined symbol error not caught elsewhere." << endl;
+        return 6;
+    } catch (...) {
+        cerr << "Yikes! Uncaught compiler exception (this should not happen if dave listed all exceptions in tiger.cpp)" << endl;
+        return 66;
+    }
 }
