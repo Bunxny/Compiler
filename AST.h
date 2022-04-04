@@ -224,9 +224,13 @@ public:
 	virtual string HERA_code();  // defaults to a warning, with HERA code that would error if compiled; could be "=0" in final compiler
 
 	int height();  // example we'll play with in class, not actually needed to compile
-	virtual int compute_height();  // just for an example, not needed to compile
+    virtual int compute_height();  // just for an example, not needed to compile
+	// an alternative height calculation, using lazy evaluation to avoid unnecessary calculation:
+	// const lazy<int> height = lazy<int>([this]() { return this->compute_height(); });
+
 	int depth();   // example we'll play with in class, not actually needed to compile
-	virtual int compute_depth();   // just for an example, not needed to compile
+	virtual int compute_depth();   // just for an example, not needed to compile, return 0 for root, 1+parent's depth for others
+    // const lazy<int> depth = lazy<int>([this]() { return this->compute_depth(); });
 
 protected:  // so that derived class's set_parent should be able to get at stored_parent for "this" object ... Smalltalk allows this by default
 	AST_node_ *stored_parent = 0;
