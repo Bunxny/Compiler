@@ -53,6 +53,8 @@ AST_node_ *AST_node_::parent()	// get the parent node, after the 'set parent poi
 
 AST_node_ *A_root_::parent()
 {
-	EM_error("Called parent() for root node. This typically happens when A_root has not defined a method for some inherited attribute.", true);
+	EM_error("Called parent() for root node."
+		 " This typically happens when A_root has not defined a method for some inherited attribute,\n"
+		 " or when you forget the word \"virtual\" for a method at the AST_node_ or A_exp_ level.", true);
 	throw "Oops, shouldn't get here, if 'true' is on for 'is this error fatal";
 }
