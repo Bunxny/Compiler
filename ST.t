@@ -1,4 +1,4 @@
-/// todo: Some day, #include <hc_list.h>
+#include <hc_list_helpers.h>
 
 template <class symbol_info> struct ST_node {
 	ST_node(const ST<symbol_info> &r, const name_type &name, symbol_info *ip);
@@ -119,5 +119,25 @@ template <class symbol_info> string ST<symbol_info>::repr_method()
 		if (h) result = result + ", ";
 	}
 	result = result + ")";
+	return result;
+}
+
+
+template <class symbol_info> string ST<symbol_info>::str_just_names()
+{
+	string result = "ST{";
+	HaverfordCS::list<string> namesInAlready;
+	ST_node<symbol_info> *h = this->head;
+	bool first = true;
+	while (h != 0) {
+		string nextName = str(h->n);
+		if (! find(nextName, namesInAlready)) {
+			namesInAlready = HaverfordCS::list<string>(nextName, namesInAlready);
+			result = result + (first?"":", ") + repr(h->n);
+			first = false;
+		}
+		h = h->rest.head;
+	}
+	result = result + "}";
 	return result;
 }

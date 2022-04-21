@@ -117,6 +117,8 @@ void ST_examples()
    ST_example avail_in_first_inner_let   = MergeAndShadow(first_inner_let_decs, avail_in_outer_let);
 
    EM_debug("Symbols available in 'wombat + arthropod' node:\n" + str(avail_in_first_inner_let));
+   EM_debug("Symbols available in 'wombat + arthropod' node, looking only at the names (doesn't require __str__ or __repr__ in the symbol-info class:  " + avail_in_first_inner_let.str_just_names());
+   
    EM_debug("Lookup of 'wombat'    here produces: " + str(lookup(to_Symbol("wombat"), avail_in_first_inner_let)));
    EM_debug("Lookup of 'arthropod' here produces: " + str(lookup(to_Symbol("arthropod"), avail_in_first_inner_let)));
 

@@ -46,13 +46,15 @@ public:
 	
 	// make empty ST -- always works
 	ST();
-    // make 1-entry ST -- always works
-    ST(const name_type &name, const symbol_info &info);
-    // make 1-entry ST -- always works
-    explicit ST(std::pair<const name_type &, const symbol_info &>);
+	// make 1-entry ST -- always works
+	ST(const name_type &name, const symbol_info &info);
+	// make 1-entry ST -- always works
+	explicit ST(std::pair<const name_type &, const symbol_info &>);
 	// make n-entry ST from a list of n name/info pairs --- requires that names be distinct
 	explicit ST(std::list<std::pair<const name_type &, const symbol_info &>>);
 
+	bool isEmpty() const { return head == nullptr; }
+	
 	// fuse and merge are listed below the class
 	
 
@@ -86,9 +88,10 @@ public:
 	// lookup(look, merge(in, out))	===    lookup(look, in), if is_name_there(look, T1),
 	//                                  or lookup(look, out), otherwise
 	friend symbol_info &lookup<symbol_info>(const name_type &must_find_this, const ST<symbol_info> &in_this_table);
-	string repr_method();
+	string repr_method();  // ToDo: Maybe rename this __repr__??? what's going on with having multiple standards for this?
 	string str_method()  { return this->repr_method(); }
-
+	string str_just_names();  // return a string with _just_ the names, e.g. "ST{a, b}"
+	
 private:
 	// DATA
 	ST_node<symbol_info> *head; // Null pointer means empty ST // Todo: make this a refcounted pointer
