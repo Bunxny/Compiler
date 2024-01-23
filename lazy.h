@@ -20,7 +20,7 @@
 // Note that T must have a constructor that does not require arguments
 template <class T> class lazy {
 public:
-	lazy<T>(std::function<T ()> init_function);
+	explicit lazy<T>(std::function<T ()> init_function);
 
 	const T &get() const;	// get the value if it has been set, or throw a lazy::cyclic_definition exception if not yet set
 
@@ -29,7 +29,7 @@ public:
 		const lazy<T> &what_wasnt_ready;
 	private:
 		friend class lazy<T>;
-		cyclic_definition(const lazy<T> &what);
+		explicit cyclic_definition(const lazy<T> &what);
 	};
 
 private:

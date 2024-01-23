@@ -47,7 +47,7 @@ AST_node_ *AST_node_::get_parent_without_checking()  // NOT FOR GENERAL USE ... 
 }
 AST_node_ *AST_node_::parent()	// get the parent node, after the 'set parent pointers' pass
 {
-	assert("parent pointers have been set" && stored_parent);
+	precondition("parent pointers have been set" && stored_parent);  // don't get the parent unless it has been set!
 	return stored_parent;
 }
 
