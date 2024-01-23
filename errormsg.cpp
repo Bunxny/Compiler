@@ -182,7 +182,7 @@ Position::Position(const Position &start, const Position &end)
 #else
 	s=start.s;
 	e=max(max(start.s, end.s), end.e);
-	//	assert("to be a valid position range, " && s>=0 && e>=0);
+	//	hccs_assert("to be a valid position range, " && s>=0 && e>=0);
 #endif
 }
 

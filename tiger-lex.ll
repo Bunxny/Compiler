@@ -41,7 +41,7 @@ static int textToInt(std::string the_text)  // a C-style array of char will be c
 		// We should get here *only* if we have only numerals,
 		//  since we're called only for the pattern {digit}+ below.
 		//
-		assert (numeral >= zero and numeral <= nine);
+		hccs_assert (numeral >= zero and numeral <= nine);
 		
 		// now convert the numeral
 		int numeral_value = numeral-zero;

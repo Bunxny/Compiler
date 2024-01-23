@@ -142,6 +142,7 @@ void ST_examples()
    }
 }
 
+
 void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since it's testing error cases.
 {
 	try {
@@ -150,85 +151,85 @@ void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since i
 
 		// create a 1-item ST
 		ST_example t1 = ST_example(to_Symbol("Dave"),example_sym_info(10, 0));
-		assert(lookup(to_Symbol("Dave"), t1).pos == 10);
+        hccs_assert(lookup(to_Symbol("Dave"), t1).pos == 10);
 		try {
 			lookup(to_Symbol("Pat"), t1);
-			assert(false && "lookup should have failed above");
+            hccs_assert(false && "lookup should have failed above");
 		}
 		catch(const undefined_symbol &missing) {
-			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
+            hccs_assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
 		try {
 			lookup(to_Symbol("Dave"), t0);
-			assert(false && "lookup should have failed above");
+            hccs_assert(false && "lookup should have failed above");
 		}
 		catch(const undefined_symbol &missing) {
-			assert(Symbols_are_equal(missing.name, to_Symbol("Dave")));
+            hccs_assert(Symbols_are_equal(missing.name, to_Symbol("Dave")));
 		}
 
 		// now try a bad fuse:
 		try {
 			fuse(t1, ST_example(to_Symbol("Dave"), example_sym_info(15, 0)));
-			assert(false && "fuse should have failed above");
+            hccs_assert(false && "fuse should have failed above");
 		}
 		catch(const undefined_symbol &dup) {
-			assert(Symbols_are_equal(to_Symbol("Dave"), dup.name));
+            hccs_assert(Symbols_are_equal(to_Symbol("Dave"), dup.name));
 		}
 
 
 		// combine t1 and a new symbol, producing a new ST
 		ST_example t12 = fuse(t1, ST_example(to_Symbol("Pat"), example_sym_info(20, 0)));
-		assert(lookup(to_Symbol("Dave"), t12).pos == 10);
-		assert(lookup(to_Symbol("Pat"), t12).pos == 20);
+        hccs_assert(lookup(to_Symbol("Dave"), t12).pos == 10);
+        hccs_assert(lookup(to_Symbol("Pat"), t12).pos == 20);
 
 		// the above should not affect t1
 		try {
 			lookup(to_Symbol("Pat"), t1);
-			assert(false && "lookup should have failed above");
+            hccs_assert(false && "lookup should have failed above");
 		}
 		catch(const undefined_symbol & missing) {
-			assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
+            hccs_assert(Symbols_are_equal(missing.name, to_Symbol("Pat")));
 		}
 
 		// another ST
 		ST_example t34 = fuse(ST_example(to_Symbol("Jamie"), example_sym_info(30, 0)),ST_example(to_Symbol("Kris"), example_sym_info(40, 0)));
-		assert(lookup(to_Symbol("Jamie"), t34).pos == 30);
-		assert(lookup(to_Symbol("Kris"), t34).pos == 40);
+        hccs_assert(lookup(to_Symbol("Jamie"), t34).pos == 30);
+        hccs_assert(lookup(to_Symbol("Kris"), t34).pos == 40);
 
 		// another ST containing to_Symbol("Pat")
 		ST_example t342a = fuse(t34,ST_example(to_Symbol("Pat"),example_sym_info(25, 0)));
-		assert(lookup(to_Symbol("Jamie"), t342a).pos == 30);
-		assert(lookup(to_Symbol("Kris"), t342a).pos == 40);
-		assert(lookup(to_Symbol("Pat"), t342a).pos == 25);
+        hccs_assert(lookup(to_Symbol("Jamie"), t342a).pos == 30);
+        hccs_assert(lookup(to_Symbol("Kris"), t342a).pos == 40);
+        hccs_assert(lookup(to_Symbol("Pat"), t342a).pos == 25);
 
 		// fuse disjoint tables 
 		ST_example t1234 = fuse(t12, t34);
-		assert(lookup(to_Symbol("Dave"), t1234).pos == 10);
-		assert(lookup(to_Symbol("Pat"), t1234).pos == 20);
-		assert(lookup(to_Symbol("Jamie"), t1234).pos == 30);
-		assert(lookup(to_Symbol("Kris"), t1234).pos == 40);
+        hccs_assert(lookup(to_Symbol("Dave"), t1234).pos == 10);
+        hccs_assert(lookup(to_Symbol("Pat"), t1234).pos == 20);
+        hccs_assert(lookup(to_Symbol("Jamie"), t1234).pos == 30);
+        hccs_assert(lookup(to_Symbol("Kris"), t1234).pos == 40);
 
 		// fail to fuse non-disjoint tables
 		try {
 			fuse(t12, t342a);
-			assert(false && "fuse should have failed above");
+            hccs_assert(false && "fuse should have failed above");
 		}
 		catch(const undefined_symbol &dup) {
-			assert(Symbols_are_equal(to_Symbol("Pat"), dup.name));
+            hccs_assert(Symbols_are_equal(to_Symbol("Pat"), dup.name));
 		}
 
 		// combine t12 and t342a with t342a shadowing t12
 		ST_example t12342a = merge(t342a, t12);
-		assert(lookup(to_Symbol("Dave"), t12342a).pos == 10);
-		assert(lookup(to_Symbol("Pat"), t12342a).pos == 25);
-		assert(lookup(to_Symbol("Jamie"), t12342a).pos == 30);
-		assert(lookup(to_Symbol("Kris"), t12342a).pos == 40);
+        hccs_assert(lookup(to_Symbol("Dave"), t12342a).pos == 10);
+        hccs_assert(lookup(to_Symbol("Pat"), t12342a).pos == 25);
+        hccs_assert(lookup(to_Symbol("Jamie"), t12342a).pos == 30);
+        hccs_assert(lookup(to_Symbol("Kris"), t12342a).pos == 40);
 
-		assert(lookup(to_Symbol("Pat"), t12).pos == 20);
+        hccs_assert(lookup(to_Symbol("Pat"), t12).pos == 20);
 	}
 	catch (...) {
-		assert(false && "test_st got an unexpected exception");
+        hccs_assert(false && "test_st got an unexpected exception");
 	}
 }
 

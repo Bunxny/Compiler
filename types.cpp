@@ -26,6 +26,7 @@ using namespace HaverfordCS;
 // 		is_prime(power(2, x)-1)
 // end
 
+
 void Ty_examples()  // examples
 {
 // 		var x : int = 5
@@ -78,7 +79,7 @@ void Ty_examples()  // examples
 	Ty_ty type_of_list = Ty_Name(to_Symbol("list"), Ty_Error());
 	// o.k., there's the Ty_Name ... now we can _overwrite_ the type
 	//
-	assert(type_of_list->kind == Ty_name);
+    hccs_assert(type_of_list->kind == Ty_name);
 	type_of_list->u.name.ty = Ty_Record(Ty_FieldList(Ty_Field(to_Symbol("head"), Ty_Int()),
 													 Ty_FieldList(Ty_Field(to_Symbol("rest"), type_of_list), // NOTE USE OF TYPE WE'RE DEFINING
 																  0)));
