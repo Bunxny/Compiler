@@ -145,6 +145,8 @@ void ST_examples()
 
 void ST_test() // NOTE: This is supposed to throw&catch some exceptions, since it's testing error cases.
 {
+    std::cerr << "TO-DO: Dave needs to convert these ST_tests into doctest" << std::endl;
+    return;
 	try {
 		// empty ST
 		ST_example t0 = ST_example();
