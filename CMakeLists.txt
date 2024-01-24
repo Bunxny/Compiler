@@ -22,24 +22,24 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(tiger
         ${BISON_TigerParser_OUTPUTS}
         ${FLEX_TigerScanner_OUTPUTS}
-        AST
-        AST-print-attributes
-        AST-print
-        depth
-        errormsg
-        height
-        HERA_code
-        layout_frames
-        lazy
-        parent
-        result_reg
-        static_checks
-        ST
-        tiger
-        tigerParseDriver
-        typecheck
-        types
-        util
+        AST.cpp
+        AST-print-attributes.cpp
+        AST-print.cpp
+        depth.cpp
+        errormsg.cpp
+        height.cpp
+        HERA_code.cpp
+        layout_frames.cpp
+        lazy.cpp
+        parent.cpp
+        result_reg.cpp
+        static_checks.cpp
+        ST.cpp
+        tiger.cpp
+        tigerParseDriver.cpp
+        typecheck.cpp
+        types.cpp
+        util.cpp
 )
 
 include_directories(/home/courses/include ../HaverfordCS/include)

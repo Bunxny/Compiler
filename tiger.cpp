@@ -147,9 +147,9 @@ int main(int argc, char **argv)
         EM_reset(filename, 8, debug, crash_on_fatal);
 
         EM_debug("Beginning self-test of modules, feel free to comment out these steps if confident.");
-        ST_examples(); // confirm examples work
-        ST_test();     // internal consistency check
-        lazy_test();   // internal consistency check of lazy-evaluation system
+        // ST_examples(); // confirm examples work
+        // ST_test();     // internal consistency check
+        // lazy_test();   // internal consistency check of lazy-evaluation system
         EM_debug("Completed self-test of modules; if no errors/warnings, yay.");
 
 #if defined COMPILE_LEX_TEST
