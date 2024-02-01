@@ -42,7 +42,7 @@ static int textToInt(std::string the_text)  // a C-style array of char will be c
 		//  since we're called only for the pattern {digit}+ below.
 		//
 		hccs_assert (numeral >= zero and numeral <= nine);
-		
+
 		// now convert the numeral
 		int numeral_value = numeral-zero;
 		
@@ -116,10 +116,14 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 
 [ \t]	{ loc.step(); }
 [\n\r]	{ loc.lines(yyleng); loc.step(); }
+(\/\*[^\/\n\r]*\*\/)  { loc.step(); }
 
 
 \+		{ return yy::tigerParser::make_PLUS(loc); }
 \*		{ return yy::tigerParser::make_TIMES(loc); }
+\-	    { return yy::tigerParser::make_MINUS(loc); }
+\(	    { return yy::tigerParser::make_LPAREN(loc); }
+\)	    { return yy::tigerParser::make_RPAREN(loc); }
 
 {integer}	{
    return yy::tigerParser::make_INT(textToInt(yytext), loc);

@@ -69,6 +69,7 @@ class tigerParseDriver;
 //  but with _ordered_sequence_ of %left/%right/%nonassoc steps,
 //  we define precedence (stickiness), with the "stickiest" (highest precedence) at the bottom of the list
 
+%left MINUS
 %left PLUS 
 %left TIMES
 
@@ -112,6 +113,15 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 								  $$.type = Ty_Int();
 								  EM_debug("Got times expression.", $$.AST->pos());
 			  					}
+    | exp[exp1] MINUS exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+												   A_minusOp,  $exp1.AST,$exp2.AST);
+								  $$.type = Ty_Int();
+								  EM_debug("Got minus expression.", $$.AST->pos());
+								}
+    | LPAREN exp[exp1] RPAREN	{ $$.AST = $exp1.AST;
+								  $$.type = Ty_Int();
+								  EM_debug("Got parenthesis expression.", $$.AST->pos());
+								}
 //
 // Note: In older compiler tools, instead of writing $exp1 and $exp2, we'd write $1 and $3,
 //        to refer to the first and third elements on the right-hand-side of the production.

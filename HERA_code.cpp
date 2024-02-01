@@ -38,6 +38,8 @@ string A_opExp_::HERA_code()
         HERA_op = "ADD";
     } else if (this->_oper == A_timesOp) {
         HERA_op = "MUL";
+    } else if (this->_oper == A_minusOp) {
+        HERA_op = "SUB";
     } else {
         EM_error("Unhandled case in HERA_math_op");
         return "Oops_unhandled_hera_math_op";
