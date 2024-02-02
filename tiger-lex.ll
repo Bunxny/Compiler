@@ -116,7 +116,7 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 
 [ \t]	{ loc.step(); }
 [\n\r]	{ loc.lines(yyleng); loc.step(); }
-(\/\*[^\/\n\r]*\*\/)  { loc.step(); }
+(\/\*[^\/]*\*\/)  { loc.step(); }
 
 
 \+		{ return yy::tigerParser::make_PLUS(loc); }
