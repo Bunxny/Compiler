@@ -56,3 +56,9 @@ string A_opExp_::HERA_code()
 	// Or, equivalently,
 	// return _left->HERA_code() + _right->HERA_code() + my_code;
 }
+
+string A_callExp_::HERA_code() {
+        string returnString = this->_args->_head->HERA_code() + "\n";
+        returnString += indent_math + "CALL(FP_alt, printint)";
+        return returnString;
+}

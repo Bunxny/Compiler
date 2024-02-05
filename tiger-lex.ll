@@ -124,6 +124,7 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 \-	    { return yy::tigerParser::make_MINUS(loc); }
 \(	    { return yy::tigerParser::make_LPAREN(loc); }
 \)	    { return yy::tigerParser::make_RPAREN(loc); }
+\printint { return yy::tigerParser::make_ID(yytext,loc); }
 
 {integer}	{
    return yy::tigerParser::make_INT(textToInt(yytext), loc);
