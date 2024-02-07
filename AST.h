@@ -321,6 +321,7 @@ class A_stringExp_ : public A_leafExp_ {
 public:
 	A_stringExp_(A_pos pos, String s);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
 private:
 	String value;
 };

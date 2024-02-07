@@ -117,14 +117,18 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 								  $$.type = Ty_Int();
 								  EM_debug("Got minus expression.", $$.AST->pos());
 								}
-    //| LPAREN exp[exp1] RPAREN	{ $$.AST = $exp1.AST;
-								  //$$.type = Ty_Int();
-								  //EM_debug("Got parenthesis expression.", $$.AST->pos());
-								//}
-    | ID[i] LPAREN exp[exp1] RPAREN         { $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
-                                            $$.type = Ty_Int();
-								 EM_debug("Got call expression.", $$.AST->pos());
+    | LPAREN exp[exp1] RPAREN   { $$.AST = $exp1.AST;
+								  $$.type = Ty_Int();
+								  EM_debug("Got parenthesis expression.", $$.AST->pos());
 								}
+    | ID[i] LPAREN exp[exp1] RPAREN { $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
+                                      $$.type = Ty_Int();
+								      EM_debug("Got call expression.", $$.AST->pos());
+								}
+exp:  STRING[i]					{ $$.AST = A_StringExp(Position::fromLex(@i), $i);
+    								  $$.type = Ty_String();
+    								  EM_debug("Got string ", $$.AST->pos());
+    							    }
 //
 // Note: In older compiler tools, instead of writing $exp1 and $exp2, we'd write $1 and $3,
 //        to refer to the first and third elements on the right-hand-side of the production.

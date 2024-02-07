@@ -59,6 +59,12 @@ string A_opExp_::HERA_code()
 
 string A_callExp_::HERA_code() {
         string returnString = this->_args->_head->HERA_code() + "\n";
+        returnString += indent_math + "MOVE(R1, " + this->_args->_head->result_reg_s() + ")\n";
         returnString += indent_math + "CALL(FP_alt, printint)";
         return returnString;
+}
+string A_stringExp_::HERA_code()
+{
+    string s = indent_math + this->HERA_code() + "\n";
+    return s;
 }

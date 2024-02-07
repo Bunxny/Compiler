@@ -91,6 +91,7 @@ int tigerParseDriver::parse (const std::string &f)
    since then 2-1 looks like two integers side-by-side, not a subtraction */
    
 integer	[0-9]+
+string	(\"[^\"]*\")
 
 /* real numbers don't occur in tiger, but if they did,
    and we always wanted a "." with at least one numeral preceding it,
@@ -117,6 +118,7 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 [ \t]	{ loc.step(); }
 [\n\r]	{ loc.lines(yyleng); loc.step(); }
 (\/\*[^\/]*\*\/)  { loc.step(); }
+((\/\*)+(([^\*]|(\*+[^\*\/]))*)(\*\/){1}) { loc.step(); }
 
 
 \+		{ return yy::tigerParser::make_PLUS(loc); }
@@ -124,12 +126,16 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 \-	    { return yy::tigerParser::make_MINUS(loc); }
 \(	    { return yy::tigerParser::make_LPAREN(loc); }
 \)	    { return yy::tigerParser::make_RPAREN(loc); }
-\printint { return yy::tigerParser::make_ID(yytext,loc); }
+printint { return yy::tigerParser::make_ID(yytext,loc); }
+print { return yy::tigerParser::make_ID(yytext,loc); }
 
 {integer}	{
    return yy::tigerParser::make_INT(textToInt(yytext), loc);
    /* textToInt is defined above */
    /* make_INT, make_END from example at https://www.gnu.org/software/bison/manual/html_node/Complete-Symbols.html#Complete-Symbols */	  
+   }
+{string} {
+      return yy::tigerParser::make_STRING(yytext, loc);
    }
 
 \<[Ee][Oo][Ff]\>		{ return yy::tigerParser::make_END(loc); /* this RE matches the literal five characters <EOF>, regardless of upper/lower case   */ }
