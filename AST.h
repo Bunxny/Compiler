@@ -245,15 +245,9 @@ public:
 	explicit A_exp_(A_pos p);
 
 	// Attributes for all expressions: result_reg() is the register number to use;
-	//  in the first call, it is defined by the init_result_reg for the class,
-	//  and then reused each time we ask for it.
-	int    result_reg() {
-		if (this->stored_result_reg < 0) this->stored_result_reg = this->init_result_reg();
-		return stored_result_reg;
-	}
-	string result_reg_s() { // return in string form, e.g. "R2"
-		return "R" + std::to_string(this->result_reg());
-	}
+	// and result_reg_s() is that as a string, i.e., instead of 4, it's "R4"
+	int    result_reg();
+	string result_reg_s();
 
 	// we'll need to print the register number attribute for exp's
 	String attributes_for_printing() override;
