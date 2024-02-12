@@ -78,6 +78,7 @@ class tigerParseDriver;
 
 /* Attributes types for nonterminals are next, e.g. struct's from tigerParseDriver.h */
 %type <expAttrs>  exp
+%type <elistAttrs>  elist
 
 
 
@@ -93,7 +94,7 @@ class tigerParseDriver;
 
 %start program;
 program: exp[main]	{ EM_debug("Got the main expression of our tiger program.", $main.AST->pos());
-		 			  if ($main.type != Ty_Int()) EM_error("Sorry, at this time, main expression must be an integer");
+		 			  if ($main.type != Ty_Int()&&$main.type != Ty_String()&&$main.type != Ty_Void()) EM_error("Sorry, at this time, main expression must be an integer");
 		 			  driver.AST = new A_root_($main.AST);
 		 			}
 	;
@@ -102,17 +103,26 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 								  $$.type = Ty_Int();
 								  EM_debug("Got int " + str($i), $$.AST->pos());
 								}
-	| exp[exp1] PLUS exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+	| exp[exp1] PLUS exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
+                                      EM_error("Error: Type mismatch in plus");
+                                }
+	                              $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_plusOp,  $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got plus expression.", $$.AST->pos());
 								}
-	| exp[exp1] TIMES exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+	| exp[exp1] TIMES exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
+                                      EM_error("Error: Type mismatch in times");
+                                }
+	                              $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_timesOp, $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got times expression.", $$.AST->pos());
 			  					}
-    | exp[exp1] MINUS exp[exp2]	{ $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+    | exp[exp1] MINUS exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
+                                        EM_error("Error: Type mismatch in subtraction");
+                                }
+                                  $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_minusOp,  $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got minus expression.", $$.AST->pos());
@@ -121,14 +131,35 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 								  $$.type = Ty_Int();
 								  EM_debug("Got parenthesis expression.", $$.AST->pos());
 								}
-    | ID[i] LPAREN exp[exp1] RPAREN { $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
-                                      $$.type = Ty_Int();
+    | STRING[i]					{ $$.AST = A_StringExp(Position::fromLex(@i), $i);
+   								  $$.type = Ty_String();
+      							  EM_debug("Got string ", $$.AST->pos());
+        					    }
+    | ID[i] LPAREN exp[exp1] RPAREN { if ($i == "print" && $exp1.type != Ty_String())EM_error("needs to be string");
+                                      if ($i == "printint" && $exp1.type != Ty_Int())EM_error("needs to be integer");
+                                      $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
+                                      $$.type = Ty_Void();
 								      EM_debug("Got call expression.", $$.AST->pos());
-								}
-exp:  STRING[i]					{ $$.AST = A_StringExp(Position::fromLex(@i), $i);
-    								  $$.type = Ty_String();
-    								  EM_debug("Got string ", $$.AST->pos());
-    							    }
+								    }
+	//| LPAREN elist[elist1] RPAREN {
+                                      //$$.AST = A_SeqExp(Position::undefined(), $elist1.AST);
+                                      //$$.type = $elist1.type;
+                                     // EM_debug("got expression sequence.");
+                                   // }
+    | LPAREN exp[exp1] SEMICOLON elist[elist1] RPAREN   { $$.AST = A_SeqExp(Position::undefined(), A_ExpList($exp1.AST, $elist1.AST));
+    								  $$.type =  $elist1.type;
+    								  EM_debug("Got expression sequence.", $$.AST->pos());
+    								}
+elist:
+        exp[exp1] SEMICOLON elist[elist1] {
+                                $$.AST = A_ExpList($exp1.AST, $elist1.AST);
+                                $$.type = $elist1.type;
+        					    EM_debug("Got expression list.", $$.AST->pos());
+        						}
+        |exp[exp1] {            $$.AST = A_ExpList($exp1.AST, 0);
+                                $$.type = $exp1.type;
+                                EM_debug("Got parenthesis expression.", $$.AST->pos());
+                                }
 //
 // Note: In older compiler tools, instead of writing $exp1 and $exp2, we'd write $1 and $3,
 //        to refer to the first and third elements on the right-hand-side of the production.

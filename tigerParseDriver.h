@@ -7,6 +7,10 @@ struct expAttrs {
 		Ty_ty type;
 		A_exp AST;
 };
+struct elistAttrs {
+    Ty_ty type;
+    A_expList AST;
+};
 #include "tiger-grammar.tab.hpp"
 
 

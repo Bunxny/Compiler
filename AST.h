@@ -432,6 +432,7 @@ class A_seqExp_ : public A_controlExp_ {
 public:
 	A_seqExp_(A_pos pos, A_expList seq);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
 private:
 	A_expList _seq;
 };
@@ -476,6 +477,8 @@ public:
 	int length();
 	A_exp _head;
 	A_expList _tail;
+    A_exp last_elist_exp();
+    string HERA_code();
 };
 
 // The componends of a A_recordExp, e.g. point{X = 4, Y = 12}

@@ -13,6 +13,16 @@ string A_exp_::result_reg_s() { // return in string form, e.g. "R2"
     return "R" + std::to_string(this->result_reg());
 }
 
+A_exp A_expList_::last_elist_exp() {
+    A_exp front = this->_head;
+    A_expList body = this->_tail;
+    while(body != nullptr) {
+        front = body->_head;
+        body = body->_tail;
+    }
+    return front;
+}
+
 
 // The keyword "static", used outside of a function or class,
 //   means we want a global variable but it's limited-access for only in this file

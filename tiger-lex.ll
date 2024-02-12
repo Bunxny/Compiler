@@ -126,6 +126,7 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 \-	    { return yy::tigerParser::make_MINUS(loc); }
 \(	    { return yy::tigerParser::make_LPAREN(loc); }
 \)	    { return yy::tigerParser::make_RPAREN(loc); }
+\;	    { return yy::tigerParser::make_SEMICOLON(loc); }
 printint { return yy::tigerParser::make_ID(yytext,loc); }
 print { return yy::tigerParser::make_ID(yytext,loc); }
 
