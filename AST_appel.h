@@ -88,6 +88,7 @@ inline A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp)
 
 inline A_expList A_ExpList(A_exp head, A_expList tail)
 {
+    precondition(head != nullptr);
 	return new A_expList_(head, tail);
 }
 inline A_efield A_Efield(Symbol name, A_exp exp)

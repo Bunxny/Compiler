@@ -57,7 +57,7 @@ class tigerParseDriver;
   ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END_LET OF 
   BREAK NIL
   FUNCTION VAR TYPE DOT
-  PLUS MINUS TIMES DIVIDE ASSIGN EQ NEQ LT LE GT GE OR AND NOT
+  PLUS MINUS UMINUS TIMES DIVIDE ASSIGN EQ NEQ LT LE GT GE OR AND NOT
 ;
 
 %token <bool> BOOL
@@ -68,9 +68,14 @@ class tigerParseDriver;
 // Next, the precedence rules; these can be from the list of tokens above,
 //  but with _ordered_sequence_ of %left/%right/%nonassoc steps,
 //  we define precedence (stickiness), with the "stickiest" (highest precedence) at the bottom of the list
-
+%left IF THEN
+%left ELSE
+%left GT GE LT LE
 %left MINUS PLUS
-%left TIMES
+%left TIMES DIVIDE
+%left UMINUS
+%left LPAREN RPAREN
+%left SEMICOLON
 
 
 
@@ -94,7 +99,8 @@ class tigerParseDriver;
 
 %start program;
 program: exp[main]	{ EM_debug("Got the main expression of our tiger program.", $main.AST->pos());
-		 			  if ($main.type != Ty_Int()&&$main.type != Ty_String()&&$main.type != Ty_Void()) EM_error("Sorry, at this time, main expression must be an integer");
+		 			  if ($main.type != Ty_Int() && $main.type != Ty_String() && $main.type != Ty_Void() && $main.type != Ty_Bool() && $main.type != Ty_Void())
+		 			   EM_error("Sorry, at this time, main expression must be an integer");
 		 			  driver.AST = new A_root_($main.AST);
 		 			}
 	;
@@ -103,53 +109,122 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
 								  $$.type = Ty_Int();
 								  EM_debug("Got int " + str($i), $$.AST->pos());
 								}
-	| exp[exp1] PLUS exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
-                                      EM_error("Error: Type mismatch in plus");
-                                }
+	| exp[exp1] PLUS exp[exp2]	{
 	                              $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_plusOp,  $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got plus expression.", $$.AST->pos());
 								}
-	| exp[exp1] TIMES exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
-                                      EM_error("Error: Type mismatch in times");
-                                }
+	| exp[exp1] TIMES exp[exp2]	{
 	                              $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_timesOp, $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got times expression.", $$.AST->pos());
 			  					}
-    | exp[exp1] MINUS exp[exp2]	{ if ($exp1.type != Ty_Int() || $exp2.type != Ty_Int()) {
-                                        EM_error("Error: Type mismatch in subtraction");
-                                }
+    | exp[exp1] DIVIDE exp[exp2]	{
+    	                              $$.AST = A_CallExp(Position::undefined(),to_Symbol("div"),A_ExpList($exp1.AST, A_ExpList($exp2.AST,0)));
+    								  $$.type = Ty_Int();
+    								  EM_debug("Got divide expression.", $$.AST->pos());
+    			  					}
+    | exp[exp1] GT exp[exp2]	{
+    	                             $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+    												   A_gtOp,  $exp1.AST,$exp2.AST);
+    								 $$.type = Ty_Bool();
+    								 EM_debug("Got greater than expression.", $$.AST->pos());
+    							    }
+    | exp[exp1] GE exp[exp2]	{
+        	                         $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+        											    A_geOp,  $exp1.AST,$exp2.AST);
+        							 $$.type = Ty_Bool();
+        							 EM_debug("Got greater than equal to expression.", $$.AST->pos());
+        							}
+    | exp[exp1] LT exp[exp2]	{
+            	                    $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+            						                    A_ltOp,  $exp1.AST,$exp2.AST);
+            					    $$.type = Ty_Bool();
+            					    EM_debug("Got less than to expression.", $$.AST->pos());
+            						}
+    | exp[exp1] LE exp[exp2]	{
+            	                    $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
+            								            A_leOp,  $exp1.AST,$exp2.AST);
+            					    $$.type = Ty_Bool();
+            					    EM_debug("Got less than equal to expression.", $$.AST->pos());
+            						}
+
+    | exp[exp1] MINUS exp[exp2]	{
                                   $$.AST = A_OpExp(Position::range($exp1.AST->pos(), $exp2.AST->pos()),
 												   A_minusOp,  $exp1.AST,$exp2.AST);
 								  $$.type = Ty_Int();
 								  EM_debug("Got minus expression.", $$.AST->pos());
 								}
+
+	| MINUS exp[exp1]	%prec UMINUS{
+                                      $$.AST = A_OpExp(Position::undefined(),
+    												   A_minusOp,  A_IntExp(Position::undefined(), 0),$exp1.AST);
+    								  $$.type = Ty_Int();
+    								  EM_debug("Got minus expression.", $$.AST->pos());
+    								}
+
     | LPAREN exp[exp1] RPAREN   { $$.AST = $exp1.AST;
-								  $$.type = Ty_Int();
+								  $$.type = $exp1.type;
 								  EM_debug("Got parenthesis expression.", $$.AST->pos());
 								}
     | STRING[i]					{ $$.AST = A_StringExp(Position::fromLex(@i), $i);
    								  $$.type = Ty_String();
       							  EM_debug("Got string ", $$.AST->pos());
         					    }
-    | ID[i] LPAREN exp[exp1] RPAREN { if ($i == "print" && $exp1.type != Ty_String())EM_error("needs to be string");
-                                      if ($i == "printint" && $exp1.type != Ty_Int())EM_error("needs to be integer");
+    | ID[i] LPAREN exp[exp1] RPAREN {
                                       $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
                                       $$.type = Ty_Void();
 								      EM_debug("Got call expression.", $$.AST->pos());
 								    }
+	| ID[i] LPAREN exp[exp1] COMMA exp[exp2] RPAREN {
+                                          $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, A_ExpList($exp2.AST,0)));
+                                          $$.type = Ty_Int();
+    								      EM_debug("Got call expression.", $$.AST->pos());
+    								    }
+    | ID[i] LPAREN exp[exp1] COMMA exp[exp2] COMMA exp[exp3] RPAREN {
+                                              $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, A_ExpList($exp2.AST,A_ExpList($exp3.AST,0))));
+                                              $$.type = Ty_Int();
+        								      EM_debug("Got call expression.", $$.AST->pos());
+        								    }
+    | ID[i] LPAREN RPAREN {
+                                              $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),nullptr);
+                                              $$.type = Ty_Void();
+        								      EM_debug("Got void call expression.", $$.AST->pos());
+        								    }
 	//| LPAREN elist[elist1] RPAREN {
                                       //$$.AST = A_SeqExp(Position::undefined(), $elist1.AST);
                                       //$$.type = $elist1.type;
                                      // EM_debug("got expression sequence.");
                                    // }
-    | LPAREN exp[exp1] SEMICOLON elist[elist1] RPAREN   { $$.AST = A_SeqExp(Position::undefined(), A_ExpList($exp1.AST, $elist1.AST));
+    | LPAREN exp[exp1] SEMICOLON elist[elist1] RPAREN   {
+                                      $$.AST = A_SeqExp(Position::undefined(), A_ExpList($exp1.AST, $elist1.AST));
     								  $$.type =  $elist1.type;
     								  EM_debug("Got expression sequence.", $$.AST->pos());
     								}
+    | BOOL[i]					{
+                                      $$.AST = A_BoolExp(Position::fromLex(@i), $i);
+       								  $$.type = Ty_Bool();
+          							  EM_debug("Got Bool ", $$.AST->pos());
+            					}
+    | IF exp[exp0] THEN exp[exp1] ELSE exp[exp2] {
+                                          $$.AST = A_IfExp(Position::undefined(), $exp0.AST,
+                                                            $exp1.AST, $exp2.AST);
+                                          $$.type = $exp2.type;
+                                          EM_debug("Got if expression ", $$.AST->pos());
+                                    }
+    | IF exp[exp0] THEN exp[exp1] {
+                                          $$.AST = A_IfExp(Position::undefined(), $exp0.AST,
+                                                            $exp1.AST, nullptr);
+                                          $$.type = $exp1.type;
+                                          EM_debug("Got if expression without else", $$.AST->pos());
+                                    }
+    | LPAREN RPAREN {
+                                              $$.AST =  A_SeqExp(Position::undefined(), nullptr);
+                                              $$.type = Ty_Void();
+        								      EM_debug("Got void expression.");
+        								    }
 elist:
         exp[exp1] SEMICOLON elist[elist1] {
                                 $$.AST = A_ExpList($exp1.AST, $elist1.AST);

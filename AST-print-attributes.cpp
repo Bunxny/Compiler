@@ -21,6 +21,7 @@ string A_exp_::attributes_for_printing()
 {
 	return (AST_node_::attributes_for_printing()
             + "result_reg() = " + str(result_reg()) + "; "
+            + "check_Type() = " + to_String(checkType()) + "; "
 		// concatenate any other EXP attributes here for printing
 		);
 }

@@ -55,6 +55,13 @@ static int textToInt(std::string the_text)  // a C-style array of char will be c
 	// return to_int(the_text);
 }
 
+static bool textToBool(std::string the_text) {
+    if("true" == the_text){
+        return true;
+    } else {
+        return false;
+    }
+}
 
 // This uses some stuff created by flex, so it's easiest to just put it here.
 int tigerParseDriver::parse (const std::string &f)
@@ -92,6 +99,7 @@ int tigerParseDriver::parse (const std::string &f)
    
 integer	[0-9]+
 string	(\"[^\"]*\")
+bool (true|false)
 
 /* real numbers don't occur in tiger, but if they did,
    and we always wanted a "." with at least one numeral preceding it,
@@ -101,7 +109,7 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 
 
 /* In the third section of the lex file (after the %%),
-   we can define the patterns for each token
+   we can define the patterns for each
    in terms of regular expressions and the variables above,
    and give the action (as C++ code) for each token.
    Comments are legal only inside the actions. */
@@ -124,11 +132,42 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 \+		{ return yy::tigerParser::make_PLUS(loc); }
 \*		{ return yy::tigerParser::make_TIMES(loc); }
 \-	    { return yy::tigerParser::make_MINUS(loc); }
+\>		{ return yy::tigerParser::make_GT(loc); }
+\>=		{ return yy::tigerParser::make_GE(loc); }
+\<		{ return yy::tigerParser::make_LT(loc); }
+\<=		{ return yy::tigerParser::make_LE(loc); }
 \(	    { return yy::tigerParser::make_LPAREN(loc); }
 \)	    { return yy::tigerParser::make_RPAREN(loc); }
 \;	    { return yy::tigerParser::make_SEMICOLON(loc); }
+\/	    { return yy::tigerParser::make_DIVIDE(loc); }
+\,      { return yy::tigerParser::make_COMMA(loc); }
+mod     { return yy::tigerParser::make_ID(yytext,loc); }
+div     { return yy::tigerParser::make_ID(yytext,loc); }
 printint { return yy::tigerParser::make_ID(yytext,loc); }
-print { return yy::tigerParser::make_ID(yytext,loc); }
+print   { return yy::tigerParser::make_ID(yytext,loc); }
+printbool     { return yy::tigerParser::make_ID(yytext,loc); }
+println     { return yy::tigerParser::make_ID(yytext,loc); }
+ord     { return yy::tigerParser::make_ID(yytext,loc); }
+chr     { return yy::tigerParser::make_ID(yytext,loc); }
+size     { return yy::tigerParser::make_ID(yytext,loc); }
+substring     { return yy::tigerParser::make_ID(yytext,loc); }
+concat     { return yy::tigerParser::make_ID(yytext,loc); }
+tstrcmp     { return yy::tigerParser::make_ID(yytext,loc); }
+not     { return yy::tigerParser::make_ID(yytext,loc); }
+getchar_ord     { return yy::tigerParser::make_ID(yytext,loc); }
+putchar_ord     { return yy::tigerParser::make_ID(yytext,loc); }
+flush     { return yy::tigerParser::make_ID(yytext,loc); }
+getchar     { return yy::tigerParser::make_ID(yytext,loc); }
+ungetchar    { return yy::tigerParser::make_ID(yytext,loc); }
+getline     { return yy::tigerParser::make_ID(yytext,loc); }
+getint     { return yy::tigerParser::make_ID(yytext,loc); }
+exit     { return yy::tigerParser::make_ID(yytext,loc); }
+malloc     { return yy::tigerParser::make_ID(yytext,loc); }
+free     { return yy::tigerParser::make_ID(yytext,loc); }
+if      { return yy::tigerParser::make_IF(loc); }
+else    { return yy::tigerParser::make_ELSE(loc); }
+then    { return yy::tigerParser::make_THEN(loc); }
+
 
 {integer}	{
    return yy::tigerParser::make_INT(textToInt(yytext), loc);
@@ -138,6 +177,11 @@ print { return yy::tigerParser::make_ID(yytext,loc); }
 {string} {
       return yy::tigerParser::make_STRING(yytext, loc);
    }
+
+{bool} {
+         return yy::tigerParser::make_BOOL(textToBool(yytext), loc);
+      }
+
 
 \<[Ee][Oo][Ff]\>		{ return yy::tigerParser::make_END(loc); /* this RE matches the literal five characters <EOF>, regardless of upper/lower case   */ }
 <<EOF>>					{ return yy::tigerParser::make_END(loc); /* <<EOF>> is a flex built-in for an actual end of a file, when there is no more input */ }

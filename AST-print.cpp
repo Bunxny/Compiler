@@ -51,7 +51,7 @@ String print_rep(const A_oper &o) {
 
 static String print_pos_rep(A_pos pos, String possible_comma)
 {
-	if (AST_print_positions) {
+	if (AST_print_fpositions) {
 		return str(pos) + possible_comma;  // print in a way that could be read back in, not a clear way...
 	} else {
 		return "";

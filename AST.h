@@ -198,6 +198,7 @@ class AST_node_ {  // abstract class with some common data
 public:
 	explicit AST_node_(A_pos pos);
 	virtual ~AST_node_();
+    virtual Ty_ty checkType();
 
 	A_pos pos() { return stored_pos; }
 
@@ -222,7 +223,7 @@ public:
 	// And now, the attributes that exist in ALL kinds of AST nodes.
 	//  See Design_Documents/AST_Attributes.txt for details.
 	virtual string HERA_code();  // defaults to a warning, with HERA code that would error if compiled; could be "=0" in final compiler
-
+    virtual string string_data();
 	int height();  // example we'll play with in class, not actually needed to compile
     virtual int compute_height();  // just for an example, not needed to compile
 	// an alternative height calculation, using lazy evaluation to avoid unnecessary calculation:
@@ -248,13 +249,15 @@ public:
 	// and result_reg_s() is that as a string, i.e., instead of 4, it's "R4"
 	int    result_reg();
 	string result_reg_s();
-
+    String next_string();
+    Ty_ty checkType() override;
 	// we'll need to print the register number attribute for exp's
 	String attributes_for_printing() override;
 
 private:
 	int stored_result_reg = -1;  // Initialize to -1 to be sure it gets replaced by "if" in result_reg() above
 	virtual int init_result_reg();  // This should ONLY be called from "result_reg" above!
+    string next_branch_string();
 };
 
 class A_root_ : public AST_node_ {
@@ -264,6 +267,8 @@ public:
 	string HERA_code() override;
 	AST_node_ *parent() override;	// We should never call this
 	string print_rep(int indent, bool with_attributes) override;
+    Ty_ty checkType() override;
+
 
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // should not be called, since it's in-line in the constructor
 	int compute_depth() override;  // just for an example, not needed to compile
@@ -297,6 +302,11 @@ class A_boolExp_ : public A_leafExp_ {
 public:
 	A_boolExp_(A_pos pos, bool b);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
+    Ty_ty checkType() override;
+    string string_data() override;
+    int init_result_reg() override;
+
 private:
   bool value;
 };
@@ -305,8 +315,10 @@ class A_intExp_ : public A_leafExp_ {
 public:
 	A_intExp_(A_pos pos, int i);
 	string print_rep(int indent, bool with_attributes) override;
-
 	string HERA_code() override;
+    int init_result_reg() override;
+    string string_data() override;
+    Ty_ty checkType() override;
 private:
 	int value;
 };
@@ -316,8 +328,12 @@ public:
 	A_stringExp_(A_pos pos, String s);
 	string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
+    int init_result_reg() override;
+    string string_data() override;
+    Ty_ty checkType() override;
 private:
 	String value;
+    String  uniqueLabel;
 };
 
 class A_recordExp_ : public A_literalExp_ {
@@ -356,6 +372,9 @@ public:
 	A_opExp_(A_pos pos, A_oper oper, A_exp left, A_exp right);
 	string print_rep(int indent, bool with_attributes) override;
 	string HERA_code() override;
+    int init_result_reg() override;
+    string string_data() override;
+    Ty_ty checkType() override;
 
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 	int compute_height() override;  // just for an example, not needed to compile
@@ -388,6 +407,9 @@ public:
 	A_callExp_(A_pos pos, Symbol func, A_expList args);
 	string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
+    string string_data() override;
+    int init_result_reg();
+    Ty_ty checkType() override;
 private:
 	Symbol _func;
 	A_expList _args;
@@ -402,10 +424,17 @@ class A_ifExp_ : public A_controlExp_ {
 public:
 	A_ifExp_(A_pos pos, A_exp test, A_exp then, A_exp else_or_0_pointer_for_no_else);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
+    string string_data() override;
+    int init_result_reg();
+    Ty_ty checkType() override;
+    string elseLabel();
 private:
 	A_exp _test;
 	A_exp _then;
 	A_exp _else_or_null;
+    string else_Label;
+    string endLabel;
 };
 
 
@@ -433,6 +462,9 @@ public:
 	A_seqExp_(A_pos pos, A_expList seq);
 	string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
+    int init_result_reg() override;
+    string string_data() override;
+    Ty_ty checkType() override;
 private:
 	A_expList _seq;
 };
@@ -479,6 +511,9 @@ public:
 	A_expList _tail;
     A_exp last_elist_exp();
     string HERA_code();
+    int init_result_reg();
+    string string_data() override;
+    Ty_ty checkType() override;
 };
 
 // The componends of a A_recordExp, e.g. point{X = 4, Y = 12}
@@ -642,7 +677,7 @@ private:
 
 
 extern bool have_AST_attrs;	// can be set to true with command-line arguments in tiger.cc, to print attributes
-const bool AST_print_positions=false;
+const bool AST_print_fpositions=false;
 
 
 #include "AST_appel.h"  /* For compatibility with book, and more concise object creation */
