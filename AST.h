@@ -232,7 +232,8 @@ public:
 	int depth();   // example we'll play with in class, not actually needed to compile
 	virtual int compute_depth();   // just for an example, not needed to compile, return 0 for root, 1+parent's depth for others
     // const lazy<int> depth = lazy<int>([this]() { return this->compute_depth(); });
-
+    virtual bool amIInLoop();
+    virtual string getEndLabel();
 protected:  // so that derived class's set_parent should be able to get at stored_parent for "this" object ... Smalltalk allows this by default
 	AST_node_ *stored_parent = 0;
 
@@ -268,6 +269,8 @@ public:
 	AST_node_ *parent() override;	// We should never call this
 	string print_rep(int indent, bool with_attributes) override;
     Ty_ty checkType() override;
+    bool amIInLoop() override;
+    string getEndLabel() override;
 
 
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // should not be called, since it's in-line in the constructor
@@ -379,6 +382,9 @@ public:
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 	int compute_height() override;  // just for an example, not needed to compile
 private:
+    String brTrue;
+    String brFalse;
+    String brEnd;
 	A_oper _oper;
 	A_exp _left;
 	A_exp _right;
@@ -410,9 +416,10 @@ public:
     string string_data() override;
     int init_result_reg();
     Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	Symbol _func;
-	A_expList _args;
+	A_expList _args_or_null;
 };
 
 class A_controlExp_ : public A_exp_ {
@@ -429,6 +436,7 @@ public:
     int init_result_reg();
     Ty_ty checkType() override;
     string elseLabel();
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	A_exp _test;
 	A_exp _then;
@@ -438,15 +446,41 @@ private:
 };
 
 
+class A_whileExp_ : public A_controlExp_ {
+public:
+    A_whileExp_(A_pos pos, A_exp test, A_exp body);
+    string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
+    string string_data() override;
+    int init_result_reg();
+    Ty_ty checkType() override;
+    string endLabel();
+    string startLabel();
+    bool amIInLoop() override;
+    string getEndLabel() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
+private:
+    A_exp _test;
+    A_exp _body;
+    string end_Label;
+    string start_Label;
+};
+
+
 class A_forExp_ : public A_controlExp_ {
 public:
 	A_forExp_(A_pos pos, Symbol var, A_exp lo, A_exp hi, A_exp body);
 	string print_rep(int indent, bool with_attributes) override;
+    bool amIInLoop() override;
+    string getEndLabel() override;
+    string endLabel();
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	Symbol _var;
 	A_exp _lo;
 	A_exp _hi;
 	A_exp _body;
+    string end_Label;
 };
 
 
@@ -454,7 +488,11 @@ class A_breakExp_ : public A_controlExp_ {
 public:
 	explicit A_breakExp_(A_pos p);
 	string print_rep(int indent, bool with_attributes) override;
-
+    string HERA_code() override;
+    string string_data() override;
+    int init_result_reg() override;
+    Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 };
 
 class A_seqExp_ : public A_controlExp_ {
@@ -465,6 +503,7 @@ public:
     int init_result_reg() override;
     string string_data() override;
     Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	A_expList _seq;
 };
@@ -508,12 +547,13 @@ public:
 	string print_rep(int indent, bool with_attributes) override;
 	int length();
 	A_exp _head;
-	A_expList _tail;
+	A_expList _tail_or_null;
     A_exp last_elist_exp();
     string HERA_code();
     int init_result_reg();
     string string_data() override;
     Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 };
 
 // The componends of a A_recordExp, e.g. point{X = 4, Y = 12}

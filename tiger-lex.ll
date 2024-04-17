@@ -132,10 +132,15 @@ real	[0-9]+\.[0-9]*(e-?[0-9]+)?
 \+		{ return yy::tigerParser::make_PLUS(loc); }
 \*		{ return yy::tigerParser::make_TIMES(loc); }
 \-	    { return yy::tigerParser::make_MINUS(loc); }
+\=    { return yy::tigerParser::make_EQ(loc); }
+\<\>    { return yy::tigerParser::make_NEQ(loc); }
 \>		{ return yy::tigerParser::make_GT(loc); }
-\>=		{ return yy::tigerParser::make_GE(loc); }
+\>\=		{ return yy::tigerParser::make_GE(loc); }
 \<		{ return yy::tigerParser::make_LT(loc); }
-\<=		{ return yy::tigerParser::make_LE(loc); }
+\<\=		{ return yy::tigerParser::make_LE(loc); }
+\|      { return yy::tigerParser::make_OR(loc); }
+\&      { return yy::tigerParser::make_AND(loc); }
+\!      { return yy::tigerParser::make_NOT(loc); }
 \(	    { return yy::tigerParser::make_LPAREN(loc); }
 \)	    { return yy::tigerParser::make_RPAREN(loc); }
 \;	    { return yy::tigerParser::make_SEMICOLON(loc); }
@@ -167,6 +172,9 @@ free     { return yy::tigerParser::make_ID(yytext,loc); }
 if      { return yy::tigerParser::make_IF(loc); }
 else    { return yy::tigerParser::make_ELSE(loc); }
 then    { return yy::tigerParser::make_THEN(loc); }
+while    { return yy::tigerParser::make_WHILE(loc); }
+do    { return yy::tigerParser::make_DO(loc); }
+break   { return yy::tigerParser::make_BREAK(loc); }
 
 
 {integer}	{

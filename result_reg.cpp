@@ -15,10 +15,10 @@ string A_exp_::result_reg_s() { // return in string form, e.g. "R2"
 
 A_exp A_expList_::last_elist_exp() {
     A_exp front = this->_head;
-    A_expList body = this->_tail;
+    A_expList body = this->_tail_or_null;
     while(body != nullptr) {
         front = body->_head;
-        body = body->_tail;
+        body = body->_tail_or_null;
     }
     return front;
 }
@@ -81,8 +81,8 @@ int A_opExp_::init_result_reg()
 }
 
 int A_expList_::init_result_reg(){
-    if(this->_tail != nullptr){
-        return std::max(this->_head->result_reg(), this->_tail->init_result_reg());
+    if(this->_tail_or_null != nullptr){
+        return std::max(this->_head->result_reg(), this->_tail_or_null->init_result_reg());
     } else {
         return this->_head->result_reg();
     }
@@ -96,13 +96,25 @@ int A_seqExp_::init_result_reg(){
 }
 
 int A_callExp_::init_result_reg(){
-    if (_args == nullptr) {
+    if (_args_or_null == nullptr) {
         return 1;
     }
-    return this->_args->init_result_reg();
+    return this->_args_or_null->init_result_reg();
 }
 
 
 int A_ifExp_::init_result_reg(){
-    return std::max(_then->result_reg(), _else_or_null->result_reg());
+    if (_else_or_null == nullptr) {
+        return std::max(_then->result_reg(), _test->result_reg());
+    }
+    int max = std::max(_then->result_reg(), _else_or_null->result_reg());
+    return std::max(max, _test->result_reg());
+}
+
+int A_whileExp_::init_result_reg(){
+    return std::max(_body->result_reg(), _test->result_reg());
+}
+
+int A_breakExp_::init_result_reg(){
+    return 0;
 }

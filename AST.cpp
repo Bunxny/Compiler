@@ -301,7 +301,7 @@ A_letExp_::A_letExp_(A_pos pos, A_decList decs, A_exp body) :  A_exp_(pos), _dec
 	// Appel says body and decs can each be null
 }
 
-A_callExp_::A_callExp_(A_pos pos, Symbol func, A_expList args) :  A_exp_(pos), _func(func), _args(args)
+A_callExp_::A_callExp_(A_pos pos, Symbol func, A_expList args) : A_exp_(pos), _func(func), _args_or_null(args)
 {
 	precondition(func != 0);
 }
@@ -313,6 +313,11 @@ A_controlExp_::A_controlExp_(A_pos p) : A_exp_(p)
 A_ifExp_::A_ifExp_(A_pos pos, A_exp test, A_exp then, A_exp else_or_0_pointer_for_no_else) :  A_controlExp_(pos), _test(test), _then(then), _else_or_null(else_or_0_pointer_for_no_else)
 {
 	precondition(test != 0 && then != 0);
+}
+//constr
+A_whileExp_::A_whileExp_(A_pos pos, A_exp test, A_exp body) :  A_controlExp_(pos), _test(test), _body(body)
+{
+    precondition(test != 0 && body != 0);
 }
 
 
@@ -351,7 +356,7 @@ A_subscriptVar_::A_subscriptVar_(A_pos pos, A_var var, A_exp exp) :  A_var_(pos)
 }
 
 
-A_expList_::A_expList_(A_exp head, A_expList tail) :  AST_node_(head->pos()), _head(head), _tail(tail)
+A_expList_::A_expList_(A_exp head, A_expList tail) : AST_node_(head->pos()), _head(head), _tail_or_null(tail)
 {
 	precondition(head != 0);
 }
@@ -360,10 +365,10 @@ int A_expList_::length()
 	if (this == 0)
         EM_error("Error, called expList length on a null list (could segmentation fault or get to this message, depending on implementation", true);
 	
-	if (_tail == 0)
+	if (_tail_or_null == 0)
 		return 1;
 	else
-		return 1+_tail->length();
+		return 1 + _tail_or_null->length();
 }
 
 

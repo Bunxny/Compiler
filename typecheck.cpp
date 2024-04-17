@@ -115,23 +115,28 @@ Ty_ty type_of_not =
         );
 Ty_ty type_of_getchar_ord =
         Ty_Function(Ty_Int(), // return
-                    0
+                    Ty_FieldList(Ty_Field(0, Ty_Void()), // b
+                                 0)
         );
 Ty_ty type_of_flush =
         Ty_Function(Ty_Void(), // return
-                    0
+                    Ty_FieldList(Ty_Field(0, Ty_Void()), // b
+                                 0)
         );
 Ty_ty type_of_getchar =
         Ty_Function(Ty_String(), // return
-                    0
+                    Ty_FieldList(Ty_Field(0, Ty_Void()), // b
+                                 0)
         );
 Ty_ty type_of_ungetchar =
         Ty_Function(Ty_String(), // return
-                    0
+                    Ty_FieldList(Ty_Field(0, Ty_Void()), // b
+                                 0)
         );
 Ty_ty type_of_getline =
         Ty_Function(Ty_String(), // return
-                    0
+                    Ty_FieldList(Ty_Field(0, Ty_Void()), // b
+                                 0)
         );
 Ty_ty type_of_getint =
         Ty_Function(Ty_Int(), // return
@@ -222,12 +227,15 @@ Ty_ty A_seqExp_::checkType() {
 }
 Ty_ty A_opExp_::checkType() {
     if (this->_left->checkType() != Ty_Int()) {
-        EM_error("Error: Type check failed not int", true);
+        EM_error("Error: Type check failed left of op_exp is not integer", true);
         return Ty_Error();
     } else if (this->_left->checkType() !=  this->_right->checkType()) {
-        EM_error("Error: Type check failed left and right not the same type", true);
+        EM_error("Error: Type check failed left and right of op_exp not the same type", true);
         return Ty_Error();
     } else {
+        if(this->_oper == A_ltOp || this->_oper == A_leOp || this->_oper == A_gtOp || this->_oper == A_geOp || this->_oper == A_eqOp || this->_oper == A_neqOp){
+            return Ty_Bool();
+        }
         return this->_left->checkType();
     }
 }
@@ -240,12 +248,12 @@ Ty_ty A_expList_::checkType() {
     if (this->_head == nullptr) {
         EM_error("Error: Type check failed null exp list", true);
         return Ty_Error();
-    } else if(this->_tail == nullptr) {
+    } else if(this->_tail_or_null == nullptr) {
         return this->_head->checkType();
     } else {
-        A_expList hold = this->_tail;
-        while(hold->_tail != nullptr) {
-            hold = hold->_tail;
+        A_expList hold = this->_tail_or_null;
+        while(hold->_tail_or_null != nullptr) {
+            hold = hold->_tail_or_null;
         }
         return hold->_head->checkType();
     }
@@ -262,25 +270,25 @@ Ty_ty A_callExp_::checkType() {
         return Ty_Error();
     }
 //    if (Symbol_to_string(_func) == "mod" || Symbol_to_string(_func) == "div") {
-//        if (_args->checkType() != Ty_Int()) {
+//        if (_args_or_null->checkType() != Ty_Int()) {
 //            EM_error("Error: mod and div need int types", true);
 //            return Ty_Error();
 //        } else {
-//            return _args->checkType();
+//            return _args_or_null->checkType();
 //        }
 //    } else if (Symbol_to_string(_func) == "print") {
-//        if (_args->checkType() != Ty_String()) {
+//        if (_args_or_null->checkType() != Ty_String()) {
 //            EM_error("Error:print need string types", true);
 //            return Ty_Error();
 //        } else {
-//            return _args->checkType();
+//            return _args_or_null->checkType();
 //        }
 //    } else if (Symbol_to_string(_func) == "printint") {
-//        if (_args->checkType() != Ty_Int()) {
+//        if (_args_or_null->checkType() != Ty_Int()) {
 //            EM_error("Error:printint need int types", true);
 //            return Ty_Error();
 //        } else {
-//            return _args->checkType();
+//            return _args_or_null->checkType();
 //        }
 //    } else {
 //        EM_error("Error: function not recognized for checkType", true);
@@ -288,14 +296,31 @@ Ty_ty A_callExp_::checkType() {
 //    }
 }
 Ty_ty A_ifExp_::checkType() {
-    if (_test->checkType() != Ty_Bool() ||
-            ( _else_or_null != nullptr && _then->checkType()!= _else_or_null->checkType())) {
-        EM_error("Error: if statement types not legal, needs condition bool or then and else are not same type", true);
+    if (_test->checkType() != Ty_Bool()) {
+        EM_error("Error: if statement types not legal, needs condition bool", true);
+        return Ty_Error();
+    } else if (( _else_or_null != nullptr && _then->checkType()!= _else_or_null->checkType())) {
+        EM_error("Error: if statement types not legal, then and else are not same type", true);
         return Ty_Error();
     } else {
+        if (_else_or_null == nullptr) {
+            return Ty_Void();
+        }
         return _then->checkType();
     }
+}
 
+Ty_ty A_whileExp_::checkType() {
+    if (_test->checkType() != Ty_Bool()) {
+        EM_error("Error: while statement types not legal, needs condition bool", true);
+        return Ty_Error();
+    } else {
+        return Ty_Void();
+    }
+}
+
+Ty_ty A_breakExp_::checkType() {
+    return Ty_Void();
 }
 //       so I'm putting it here.
 
