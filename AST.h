@@ -162,6 +162,7 @@ typedef Position A_pos;
 #include "symbol.h"
 #include "types.h"  // we'll need this for attributes
 #include "lazy.h"   // useful if we want lazy evaluation for attributes
+#include "typecheck.h"
 
 
 void AST_examples();  // Examples, to help understand what't going on here ... see AST.cc
@@ -199,8 +200,10 @@ public:
 	explicit AST_node_(A_pos pos);
 	virtual ~AST_node_();
     virtual Ty_ty checkType();
+    virtual int stack_size_in_me();
+    virtual ST<var_sym_info> st_vars();
 
-	A_pos pos() { return stored_pos; }
+    A_pos pos() { return stored_pos; }
 
 	// Each node will know its parent, except the root node (on which this is an error):
 	virtual AST_node_ *parent();	// get the parent node, after the 'set all parent nodes' pass
@@ -271,7 +274,8 @@ public:
     Ty_ty checkType() override;
     bool amIInLoop() override;
     string getEndLabel() override;
-
+    int stack_size_in_me();
+    ST<var_sym_info> st_vars() override;
 
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // should not be called, since it's in-line in the constructor
 	int compute_depth() override;  // just for an example, not needed to compile
@@ -362,7 +366,13 @@ private:
 class A_varExp_ : public A_exp_ {
 public:
 	A_varExp_(A_pos pos, A_var var);
+    Ty_ty checkType() override;
+    string HERA_code() override;
 	string print_rep(int indent, bool with_attributes) override;
+    int init_result_reg() override;
+    string result_reg_s();
+    string string_data() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root) override;
 private:
 	A_var _var;
 };
@@ -414,7 +424,7 @@ public:
 	string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
     string string_data() override;
-    int init_result_reg();
+    int init_result_reg() override;
     Ty_ty checkType() override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
@@ -433,7 +443,7 @@ public:
 	string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
     string string_data() override;
-    int init_result_reg();
+    int init_result_reg() override;
     Ty_ty checkType() override;
     string elseLabel();
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
@@ -452,7 +462,7 @@ public:
     string print_rep(int indent, bool with_attributes) override;
     string HERA_code() override;
     string string_data() override;
-    int init_result_reg();
+    int init_result_reg() override;
     Ty_ty checkType() override;
     string endLabel();
     string startLabel();
@@ -474,13 +484,20 @@ public:
     bool amIInLoop() override;
     string getEndLabel() override;
     string endLabel();
+    int init_result_reg() override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
+    Ty_ty checkType() override;
+    string HERA_code() override;
+    string string_data();
+    int stack_size_in_me();
+    ST<var_sym_info> st_vars();
 private:
 	Symbol _var;
 	A_exp _lo;
 	A_exp _hi;
 	A_exp _body;
     string end_Label;
+    string start_Label;
 };
 
 
@@ -511,12 +528,20 @@ private:
 class A_var_ : public AST_node_ {
 public:
 	explicit A_var_(A_pos p);
+    virtual int init_result_reg();
+    string result_reg_s();
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root) override;
 };
 
 class A_simpleVar_ : public A_var_ {
 public:
 	A_simpleVar_(A_pos pos, Symbol sym);
 	string print_rep(int indent, bool with_attributes) override;
+    int init_result_reg() override;
+    Ty_ty checkType();
+    string HERA_code() override;
+    string string_data() override;
+    int getVarLocationInFrame();
 private:
 	Symbol _sym;
 };
@@ -525,6 +550,7 @@ class A_fieldVar_ : public A_var_ {
 public:
 	A_fieldVar_(A_pos pos, A_var var, Symbol sym);
 	string print_rep(int indent, bool with_attributes) override;
+    //int init_result_reg() override;
 private:
 	A_var _var;
 	Symbol _sym;
@@ -534,6 +560,7 @@ class A_subscriptVar_ : public A_var_ {
 public:
 	A_subscriptVar_(A_pos pos, A_var var, A_exp exp);
 	string print_rep(int indent, bool with_attributes) override;
+    //int init_result_reg() override;
 
 private:
 	A_var _var;

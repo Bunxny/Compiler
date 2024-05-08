@@ -10,23 +10,8 @@
 //
 
 
-struct call_sym_info { // what do we know about a symbol?
-public:
-    call_sym_info(int the_pos,  // record the place it was declared, for error messages
-            // other attributes could go here, e.g.
-                     Ty_ty type
 
-    );
-    // leave data public, which is the default for 'struct'
-    int pos;
-    //int whatever_else;
-    Ty_ty type;
-
-    string repr_method();
-    string str_method();
-
-};
-call_sym_info::call_sym_info(int the_pos, Ty_ty the_type) : pos(the_pos)
+var_sym_info::var_sym_info(int the_pos, Ty_ty the_type) : pos(the_pos)
 {
     // The bit after the single ":" above initializes "pos" with the value "the_pos".
     // It's a lot like putting "pos = the_pos;" in the body,
@@ -34,9 +19,19 @@ call_sym_info::call_sym_info(int the_pos, Ty_ty the_type) : pos(the_pos)
 
     // Just to do something in the example, we'll ensure that whatever_else isn't negative:
         type = the_type;
+        locationInFrame = -1;
 }
 
-typedef ST<call_sym_info> ST_example;
+var_sym_info::var_sym_info(int the_pos, Ty_ty the_type, int location_in_frame) : pos(the_pos)
+{
+    // The bit after the single ":" above initializes "pos" with the value "the_pos".
+    // It's a lot like putting "pos = the_pos;" in the body,
+    //  but the latter would first build a null "pos" and then re-define it.
+
+    // Just to do something in the example, we'll ensure that whatever_else isn't negative:
+    type = the_type;
+    locationInFrame = location_in_frame;
+}
 //struct Ty_field_  {Symbol name; Ty_ty ty;};
 //struct Ty_fieldList_ {Ty_field head; Ty_fieldList tail; string str();};
 Ty_ty type_of_div =
@@ -174,30 +169,49 @@ Ty_ty type_of_free =
                                  0)
         );
 ST callsDictionary =
-        ST_example( { std::pair(to_Symbol("print"),    call_sym_info(0,  type_of_print)),
-                      std::pair(to_Symbol("printint"), call_sym_info(0, type_of_printint)),
-                      std::pair(to_Symbol("div"),      call_sym_info(0, type_of_div)),
-                      std::pair(to_Symbol("mod"),      call_sym_info(0, type_of_mod)),
-                      std::pair(to_Symbol("ord"),      call_sym_info(0, type_of_ord)),
-                      std::pair(to_Symbol("chr"),      call_sym_info(0, type_of_chr)),
-                      std::pair(to_Symbol("size"),      call_sym_info(0, type_of_size)),
-                      std::pair(to_Symbol("substring"),      call_sym_info(0, type_of_substring)),
-                      std::pair(to_Symbol("concat"),      call_sym_info(0, type_of_concat)),
-                      std::pair(to_Symbol("tstrcmp"),      call_sym_info(0, type_of_tstrcmp)),
-                      std::pair(to_Symbol("not"),      call_sym_info(0, type_of_not)),
-                      std::pair(to_Symbol("getchar_ord"),      call_sym_info(0, type_of_getchar_ord)),
-                      std::pair(to_Symbol("putchar_ord"),      call_sym_info(0, type_of_putchar_ord)),
-                      std::pair(to_Symbol("flush"),      call_sym_info(0, type_of_flush)),
-                      std::pair(to_Symbol("println"),      call_sym_info(0, type_of_println)),
-                      std::pair(to_Symbol("getchar"),      call_sym_info(0, type_of_getchar)),
-                      std::pair(to_Symbol("ungetchar"),      call_sym_info(0, type_of_ungetchar)),
-                      std::pair(to_Symbol("getline"),      call_sym_info(0, type_of_getline)),
-                      std::pair(to_Symbol("exit"),      call_sym_info(0, type_of_exit)),
-                      std::pair(to_Symbol("malloc"),      call_sym_info(0, type_of_malloc)),
-                      std::pair(to_Symbol("free"),      call_sym_info(0, type_of_free)),
-                      std::pair(to_Symbol("getint"),      call_sym_info(0, type_of_getint)),
-                      std::pair(to_Symbol("printbool"),      call_sym_info(0, type_of_printbool))
-} );
+        ST_example( { std::pair(to_Symbol("print"), var_sym_info(0, type_of_print)),
+                      std::pair(to_Symbol("printint"), var_sym_info(0, type_of_printint)),
+                      std::pair(to_Symbol("div"), var_sym_info(0, type_of_div)),
+                      std::pair(to_Symbol("mod"), var_sym_info(0, type_of_mod)),
+                      std::pair(to_Symbol("ord"), var_sym_info(0, type_of_ord)),
+                      std::pair(to_Symbol("chr"), var_sym_info(0, type_of_chr)),
+                      std::pair(to_Symbol("size"), var_sym_info(0, type_of_size)),
+                      std::pair(to_Symbol("substring"), var_sym_info(0, type_of_substring)),
+                      std::pair(to_Symbol("concat"), var_sym_info(0, type_of_concat)),
+                      std::pair(to_Symbol("tstrcmp"), var_sym_info(0, type_of_tstrcmp)),
+                      std::pair(to_Symbol("not"), var_sym_info(0, type_of_not)),
+                      std::pair(to_Symbol("getchar_ord"), var_sym_info(0, type_of_getchar_ord)),
+                      std::pair(to_Symbol("putchar_ord"), var_sym_info(0, type_of_putchar_ord)),
+                      std::pair(to_Symbol("flush"), var_sym_info(0, type_of_flush)),
+                      std::pair(to_Symbol("println"), var_sym_info(0, type_of_println)),
+                      std::pair(to_Symbol("getchar"), var_sym_info(0, type_of_getchar)),
+                      std::pair(to_Symbol("ungetchar"), var_sym_info(0, type_of_ungetchar)),
+                      std::pair(to_Symbol("getline"), var_sym_info(0, type_of_getline)),
+                      std::pair(to_Symbol("exit"), var_sym_info(0, type_of_exit)),
+                      std::pair(to_Symbol("malloc"), var_sym_info(0, type_of_malloc)),
+                      std::pair(to_Symbol("free"), var_sym_info(0, type_of_free)),
+                      std::pair(to_Symbol("getint"), var_sym_info(0, type_of_getint)),
+                      std::pair(to_Symbol("printbool"), var_sym_info(0, type_of_printbool))
+});
+//ST
+ST<var_sym_info> A_forExp_::st_vars() {
+    ST new_st = ST_example( std::pair(this->_var, var_sym_info(0, Ty_Int(), stack_size_in_me() - 2)));
+    new_st = MergeAndShadow(new_st, this->parent()->st_vars());
+    return new_st;
+}
+
+
+ST<var_sym_info> AST_node_::st_vars() {
+    return this->parent()->st_vars();
+}
+
+ST<var_sym_info> A_root_::st_vars() {
+    return callsDictionary;
+}
+
+int A_simpleVar_::getVarLocationInFrame() {
+        return lookup(_sym,this->st_vars()).locationInFrame;
+}
 
 Ty_ty AST_node_::checkType() {
     EM_error("using type check function on something that does not have a AST_node");
@@ -319,8 +333,29 @@ Ty_ty A_whileExp_::checkType() {
     }
 }
 
+
+Ty_ty A_forExp_::checkType() {
+    if (_hi->checkType() != Ty_Int() && _lo->checkType() != Ty_Int()) {
+        EM_error("Error: bounds is not type int", true);
+        return Ty_Error();
+    } if (_hi <= _lo) {
+        EM_error("Error: lower bound is higher than upper bound", true);
+        return Ty_Error();
+    } else {
+        return Ty_Void();
+    }
+}
+
 Ty_ty A_breakExp_::checkType() {
     return Ty_Void();
+}
+
+Ty_ty A_varExp_::checkType() {
+    return _var->checkType();
+}
+
+Ty_ty A_simpleVar_::checkType() {
+    return Ty_Int();
 }
 //       so I'm putting it here.
 

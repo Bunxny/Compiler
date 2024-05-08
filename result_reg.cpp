@@ -7,6 +7,9 @@
 
 int    A_exp_::result_reg() {
     if (this->stored_result_reg < 0) this->stored_result_reg = this->init_result_reg();
+    if (this->stored_result_reg > 11) {
+        EM_error("Uses over 12 registers cannot compute", true);
+    }
     return stored_result_reg;
 }
 string A_exp_::result_reg_s() { // return in string form, e.g. "R2"
@@ -37,6 +40,16 @@ int A_exp_::init_result_reg()  // generate unique numbers, starting from 1, each
 	// end of atomic transaction
 	return my_number;
 }
+int A_var_::init_result_reg()  // generate unique numbers, starting from 1, each time this is called
+{
+    EM_error("Oops, something still needs to provide an init_result_reg() but isn't.");
+    return -1;
+}
+
+string A_var_::result_reg_s() { // return in string form, e.g. "R2"
+    return "R" + std::to_string(this->init_result_reg());
+}
+
 
 static int next_unique_String_num = 1;
 string A_exp_::next_string()  // generate unique numbers, starting from 1, each time this is called
@@ -115,6 +128,27 @@ int A_whileExp_::init_result_reg(){
     return std::max(_body->result_reg(), _test->result_reg());
 }
 
+int A_forExp_::init_result_reg(){
+    int max = std::max(_lo->result_reg(), _hi->result_reg());
+    return std::max(max, _body->result_reg()) + 1; //adding one to make sure lo and this not the same
+}
+
 int A_breakExp_::init_result_reg(){
     return 0;
 }
+
+int A_varExp_::init_result_reg(){
+    return _var->init_result_reg();
+}
+
+int A_simpleVar_::init_result_reg(){
+    return 1;
+}
+
+//int A_fieldVar_::init_result_reg(){
+//    return this->init_result_reg();
+//}
+
+//int A_subscriptVar_::init_result_reg(){
+//    return this->init_result_reg();
+//}

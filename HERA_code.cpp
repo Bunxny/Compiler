@@ -22,6 +22,23 @@ string AST_node_::string_data()  // Default used during development; could be re
     return "#error " + message;  //if somehow we try to HERA-C-Run this, it will fail
 }
 
+int AST_node_::stack_size_in_me()
+{
+    return this->parent()->stack_size_in_me();
+}
+int A_forExp_::stack_size_in_me()
+{
+    return this->parent()->stack_size_in_me() + 2;
+}
+//int A_simpleVar_::stack_size_in_me() {
+//    return this->parent()->stack_size_in_me() + 1;
+//}
+
+int A_root_::stack_size_in_me()
+{
+    return 0;
+}
+
 bool AST_node_::amIInLoop()  // Default used during development; could be removed in final version
 {
     return this->parent()->amIInLoop();
@@ -159,6 +176,66 @@ string A_forExp_::endLabel() { //ex
         end_Label = "forEndLabel" + next_string();
     }
     return end_Label;
+}
+string A_forExp_::HERA_code() {
+    //st_vars();
+    if (this->start_Label == "") {
+        start_Label = "forLoopStart" + next_string();
+    }
+    String returnString = "INC(SP, 2)\n";
+    returnString += _lo->HERA_code();
+    returnString += indent_math + "STORE(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+    returnString += _hi->HERA_code();
+    returnString += indent_math + "MOVE(" + this->result_reg_s() +"," + _hi-> result_reg_s() + ")\n";
+    returnString += indent_math + "STORE(" + this->result_reg_s() + "," + str(stack_size_in_me() - 1) + ", FP) \n";
+    returnString += indent_math + "LOAD(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";//reload lo as pernote in result reg it must be diffrent
+    returnString += indent_math + "CMP(" + _lo->result_reg_s() + "," + this->result_reg_s() + ")\n";
+    returnString += indent_math + "BG(" + endLabel() + ")\n";
+    returnString += indent_math + "LABEL(" + start_Label + ")\n";
+    returnString += indent_math + _body->HERA_code();
+    returnString += indent_math + "LOAD(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+    returnString += indent_math + "INC(" + _lo->result_reg_s() + ", 1)\n";
+    returnString += indent_math + "STORE(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+    returnString += indent_math + "LOAD(" + this->result_reg_s() + "," + str(stack_size_in_me() - 1) + ", FP) \n";
+    returnString += indent_math + "CMP(" + _lo->result_reg_s() + "," + this->result_reg_s() +")\n";
+    returnString += indent_math + "BLE(" + start_Label + ")\n";
+    returnString += indent_math + "LABEL(" + endLabel() + ")\n";
+    //returnString += indent_math + "DEC( SP," + str(stack_size_in_me()) + ")\n";
+    return returnString;
+    //string returnString =  indent_math + "LABEL("+ "this->startLabel()" +")\n";
+    //returnString += _test->HERA_code();
+    //returnString +=  indent_math + "CMP(" + this->_test->result_reg_s() + ", R0 )\n";
+    //if zero/false end
+    //returnString +=  indent_math + "BZ(" + this->endLabel() + ")\n";
+    //body
+    //returnString += _body->HERA_code();
+    //go back to start
+    //returnString +=  indent_math + "BR(" + this->startLabel() + ")\n";
+   // returnString +=  indent_math + "LABEL("+ this->endLabel() +")\n";
+    //return returnString;
+}
+
+string A_forExp_::string_data() {
+    string returnString = this->_body->string_data() + _hi->string_data() + _lo->string_data();
+    return returnString;
+}
+
+string A_varExp_::HERA_code() {
+    string returnString = _var->HERA_code();
+    return returnString;
+}
+string A_varExp_::string_data() {
+    string returnString = _var->string_data();
+    return returnString;
+}
+string A_simpleVar_::HERA_code() {
+    string returnString = indent_math + "LOAD(" + this->result_reg_s() + "," + std::to_string(getVarLocationInFrame()) + ", FP) \n";
+    return returnString;
+    //return "";
+}
+string A_simpleVar_::string_data() {
+    string returnString = "";
+    return returnString;
 }
 
 string A_whileExp_::endLabel() {

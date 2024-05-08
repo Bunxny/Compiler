@@ -100,6 +100,7 @@ int tigerParseDriver::parse (const std::string &f)
 integer	[0-9]+
 string	(\"[^\"]*\")
 bool (true|false)
+identifier ([a-zA-Z]([a-zA-Z0-9_]*))
 
 /* real numbers don't occur in tiger, but if they did,
    and we always wanted a "." with at least one numeral preceding it,
@@ -159,7 +160,6 @@ substring     { return yy::tigerParser::make_ID(yytext,loc); }
 concat     { return yy::tigerParser::make_ID(yytext,loc); }
 tstrcmp     { return yy::tigerParser::make_ID(yytext,loc); }
 not     { return yy::tigerParser::make_ID(yytext,loc); }
-getchar_ord     { return yy::tigerParser::make_ID(yytext,loc); }
 putchar_ord     { return yy::tigerParser::make_ID(yytext,loc); }
 flush     { return yy::tigerParser::make_ID(yytext,loc); }
 getchar     { return yy::tigerParser::make_ID(yytext,loc); }
@@ -175,7 +175,9 @@ then    { return yy::tigerParser::make_THEN(loc); }
 while    { return yy::tigerParser::make_WHILE(loc); }
 do    { return yy::tigerParser::make_DO(loc); }
 break   { return yy::tigerParser::make_BREAK(loc); }
-
+for   { return yy::tigerParser::make_FOR(loc); }
+to   { return yy::tigerParser::make_TO(loc); }
+:=   { return yy::tigerParser::make_ASSIGN(loc); }
 
 {integer}	{
    return yy::tigerParser::make_INT(textToInt(yytext), loc);
@@ -190,6 +192,7 @@ break   { return yy::tigerParser::make_BREAK(loc); }
          return yy::tigerParser::make_BOOL(textToBool(yytext), loc);
       }
 
+{identifier}     { return yy::tigerParser::make_ID(yytext,loc); }
 
 \<[Ee][Oo][Ff]\>		{ return yy::tigerParser::make_END(loc); /* this RE matches the literal five characters <EOF>, regardless of upper/lower case   */ }
 <<EOF>>					{ return yy::tigerParser::make_END(loc); /* <<EOF>> is a flex built-in for an actual end of a file, when there is no more input */ }

@@ -79,18 +79,31 @@ void A_seqExp_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_pare
     // record my parent
     stored_parent = my_parent_or_null_if_i_am_the_root;
     // now, tell my children to record me as theirs... they'll tell the grandkids
-    _seq->set_parent_pointers_for_me_and_my_descendants(this);
+    if (_seq != nullptr) {
+        _seq->set_parent_pointers_for_me_and_my_descendants(this);
+    }
 }
 
 void A_expList_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
 {
     // record my parent
     stored_parent = my_parent_or_null_if_i_am_the_root;
-    // now, tell my children to record me as theirs... they'll tell the grandkids
+    // now, tell my childseqren to record me as theirs... they'll tell the grandkids
     _head->set_parent_pointers_for_me_and_my_descendants(this);
     if (_tail_or_null != nullptr) {
         _tail_or_null->set_parent_pointers_for_me_and_my_descendants(this);
     }
+}
+
+void A_var_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
+{
+    stored_parent = my_parent_or_null_if_i_am_the_root;
+}
+
+void A_varExp_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
+{
+    stored_parent = my_parent_or_null_if_i_am_the_root;
+    _var->set_parent_pointers_for_me_and_my_descendants(this);
 }
 
 
@@ -107,8 +120,6 @@ void AST_node_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_pare
 	EM_warning("Uh-oh, need to make set_parent_pointers_for_me_and_my_descendants actually do its full job...");
 	EM_warning(" rewrite or overrride it, instead of running this code the AST_node_ class.");
 }
-
-
 
 AST_node_ *AST_node_::get_parent_without_checking()  // NOT FOR GENERAL USE ... this is only for things like checking assertions
 {

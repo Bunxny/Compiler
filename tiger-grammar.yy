@@ -54,7 +54,7 @@ class tigerParseDriver;
 %token
   COMMA COLON SEMICOLON LPAREN RPAREN L_SQUARE_BRACKET R_SQUARE_BRACKET 
   L_CURLY_BRACE R_CURLY_BRACE
-  ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END_LET OF 
+  ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END_LET OF
   BREAK NIL
   FUNCTION VAR TYPE DOT
   PLUS MINUS UMINUS TIMES DIVIDE ASSIGN EQ NEQ LT LE GT GE OR AND NOT
@@ -204,6 +204,10 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
    								  //$$.type = Ty_String();
       							  EM_debug("Got string ", $$.AST->pos());
         					    }
+    | ID[i] {
+                     $$.AST = A_VarExp(Position::fromLex(@i),A_SimpleVar(Position::fromLex(@i), to_Symbol($i)));
+            		 EM_debug("Got var expression.", $$.AST->pos());
+            		}
     | ID[i] LPAREN exp[exp1] RPAREN {
                                       $$.AST = A_CallExp(Position::undefined(),to_Symbol($i),A_ExpList($exp1.AST, 0));
                                       //$$.type = Ty_Void();
@@ -257,9 +261,15 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
                                               //$$.type = $exp1.type;
                                               EM_debug("Got if expression without else", $$.AST->pos());
                                     }
+    | FOR ID[i] ASSIGN exp[exp0] TO exp[exp1] DO exp[exp2] {
+                                              $$.AST = A_ForExp(Position::undefined(), to_Symbol($i), $exp0.AST,
+                                                                $exp1.AST, $exp2.AST);
+                                              //$$.type = Ty_Void();
+                                              EM_debug("Got for expression", $$.AST->pos());
+                                    }
     | BREAK {
                                           $$.AST = A_BreakExp(Position::undefined());
-                                          EM_debug("Got break expression without else", $$.AST->pos());
+                                          EM_debug("Got break expression", $$.AST->pos());
                                     }
     | LPAREN RPAREN {
                                               $$.AST =  A_SeqExp(Position::undefined(), nullptr);
