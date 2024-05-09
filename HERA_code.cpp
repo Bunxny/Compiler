@@ -57,20 +57,41 @@ bool A_root_::amIInLoop()  // Default used during development; could be removed 
     return false;
 }
 
-string AST_node_::getEndLabel()  // Default used during development; could be removed in final version
+bool AST_node_::amIInFor()
 {
-    return this->parent()->getEndLabel();
+    return this->parent()->amIInFor();
+}
+bool A_forExp_::amIInFor()
+{
+    return true;
+}
+bool A_root_::amIInFor()
+{
+    return false;
 }
 
-string A_whileExp_::getEndLabel()  // Default used during development; could be removed in final version
+string
+AST_node_::getEndLabel(AST_node_ *which_child)  // Default used during development; could be removed in final version
+{
+    return this->parent()->getEndLabel(this);
+}
+
+string
+A_whileExp_::getEndLabel(AST_node_ *which_child)  // Default used during development; could be removed in final version
 {
     return this->endLabel();
 }
-string A_forExp_::getEndLabel()  // Default used during development; could be removed in final version
+string
+A_forExp_::getEndLabel(AST_node_ *which_child)  // Default used during development; could be removed in final version
 {
-    return this->endLabel();
+    if (which_child == _body) {
+        return this->endLabel();
+    } else {
+        return this->parent()->getEndLabel(this);
+    }
 }
-string A_root_::getEndLabel()  // Default used during development; could be removed in final version
+string
+A_root_::getEndLabel(AST_node_ *which_child)  // Default used during development; could be removed in final version
 {
     string message = "No loops to go through to get end label";
     EM_error(message);
@@ -178,7 +199,7 @@ string A_forExp_::endLabel() { //ex
     return end_Label;
 }
 string A_forExp_::HERA_code() {
-    //st_vars();
+    //st_vars_in_me();
     if (this->start_Label == "") {
         start_Label = "forLoopStart" + next_string();
     }
@@ -200,7 +221,7 @@ string A_forExp_::HERA_code() {
     returnString += indent_math + "CMP(" + _lo->result_reg_s() + "," + this->result_reg_s() +")\n";
     returnString += indent_math + "BLE(" + start_Label + ")\n";
     returnString += indent_math + "LABEL(" + endLabel() + ")\n";
-    //returnString += indent_math + "DEC( SP," + str(stack_size_in_me()) + ")\n";
+    returnString += indent_math + "DEC( SP, 2)\n";
     return returnString;
     //string returnString =  indent_math + "LABEL("+ "this->startLabel()" +")\n";
     //returnString += _test->HERA_code();
@@ -276,7 +297,7 @@ string A_breakExp_::HERA_code()
     if(this->amIInLoop() == false){
         EM_error("Not in loop", true);
     } else {
-        returnString ="BR(" + this->getEndLabel() + ")";
+        returnString = indent_math + "BR(" + this->getEndLabel(this) + ")\n";
     }
     return returnString;
 }

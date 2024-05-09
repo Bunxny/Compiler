@@ -201,7 +201,8 @@ public:
 	virtual ~AST_node_();
     virtual Ty_ty checkType();
     virtual int stack_size_in_me();
-    virtual ST<var_sym_info> st_vars();
+    virtual ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
+    virtual bool amIInFor();
 
     A_pos pos() { return stored_pos; }
 
@@ -236,7 +237,7 @@ public:
 	virtual int compute_depth();   // just for an example, not needed to compile, return 0 for root, 1+parent's depth for others
     // const lazy<int> depth = lazy<int>([this]() { return this->compute_depth(); });
     virtual bool amIInLoop();
-    virtual string getEndLabel();
+    virtual string getEndLabel(AST_node_ *which_child);
 protected:  // so that derived class's set_parent should be able to get at stored_parent for "this" object ... Smalltalk allows this by default
 	AST_node_ *stored_parent = 0;
 
@@ -273,9 +274,10 @@ public:
 	string print_rep(int indent, bool with_attributes) override;
     Ty_ty checkType() override;
     bool amIInLoop() override;
-    string getEndLabel() override;
+    string getEndLabel(AST_node_ *which_child) override;
     int stack_size_in_me();
-    ST<var_sym_info> st_vars() override;
+    ST<var_sym_info> st_vars_in_me(AST_node_ *which_child) override;
+    bool amIInFor() override;
 
 	void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;  // should not be called, since it's in-line in the constructor
 	int compute_depth() override;  // just for an example, not needed to compile
@@ -467,7 +469,7 @@ public:
     string endLabel();
     string startLabel();
     bool amIInLoop() override;
-    string getEndLabel() override;
+    string getEndLabel(AST_node_ *which_child) override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
     A_exp _test;
@@ -482,7 +484,7 @@ public:
 	A_forExp_(A_pos pos, Symbol var, A_exp lo, A_exp hi, A_exp body);
 	string print_rep(int indent, bool with_attributes) override;
     bool amIInLoop() override;
-    string getEndLabel() override;
+    string getEndLabel(AST_node_ *which_child) override;
     string endLabel();
     int init_result_reg() override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
@@ -490,7 +492,8 @@ public:
     string HERA_code() override;
     string string_data();
     int stack_size_in_me();
-    ST<var_sym_info> st_vars();
+    bool amIInFor() override;
+    ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
 private:
 	Symbol _var;
 	A_exp _lo;

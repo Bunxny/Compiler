@@ -1,3 +1,9 @@
-print("hello")
-/* "hello" */
+    (
+        print("Should we even run the code below?");
+        for i := (if 20>42 then break; 19) to 21 do (
+             print(" ???  ")  /* Very sad if we run this */
+         );
+           print("\n")
+      )
+
 

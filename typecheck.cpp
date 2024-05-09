@@ -194,23 +194,34 @@ ST callsDictionary =
                       std::pair(to_Symbol("printbool"), var_sym_info(0, type_of_printbool))
 });
 //ST
-ST<var_sym_info> A_forExp_::st_vars() {
-    ST new_st = ST_example( std::pair(this->_var, var_sym_info(0, Ty_Int(), stack_size_in_me() - 2)));
-    new_st = MergeAndShadow(new_st, this->parent()->st_vars());
-    return new_st;
+ST<var_sym_info> A_forExp_::st_vars_in_me(AST_node_ *which_child) {
+    if (which_child == _hi) {
+        return this->parent()->st_vars_in_me(this);
+    } else if (which_child == _lo) {
+        return this->parent()->st_vars_in_me(this);
+    } else {
+        ST new_st = ST_example(std::pair(this->_var, var_sym_info(0, Ty_Int(), stack_size_in_me() - 2)));
+        new_st = MergeAndShadow(new_st, this->parent()->st_vars_in_me(this));
+        return new_st;
+    }
 }
 
 
-ST<var_sym_info> AST_node_::st_vars() {
-    return this->parent()->st_vars();
+ST<var_sym_info> AST_node_::st_vars_in_me(AST_node_ *which_child) {
+    return this->parent()->st_vars_in_me(this);
 }
 
-ST<var_sym_info> A_root_::st_vars() {
+ST<var_sym_info> A_root_::st_vars_in_me(AST_node_ *which_child) {
     return callsDictionary;
 }
 
 int A_simpleVar_::getVarLocationInFrame() {
-        return lookup(_sym,this->st_vars()).locationInFrame;
+    try {
+        return lookup(_sym, this->st_vars_in_me(this)).locationInFrame;
+    } catch (const undefined_symbol &missing) {
+        EM_error("Error:cannot find variable in symbol table", true);
+        return -1;
+    }
 }
 
 Ty_ty AST_node_::checkType() {
