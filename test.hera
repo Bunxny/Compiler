@@ -1,0 +1,9 @@
+D_LABEL(the_string) /*string nodes data*/ /* call nodes data includes this*/
+LP_STRING("hello") /*string nodes data*/ /* call nodes data includes this*/
+
+CBON()
+
+    SET(R1,the_string) /*string nodes code*/ /* call nodes code includes this*/
+
+    MOVE(R1, R1) /*call node add to this code*/
+    CALL(FP_alt ,printint) /*call nodes add to this code*/
