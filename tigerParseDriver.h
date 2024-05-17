@@ -11,6 +11,16 @@ struct elistAttrs {
     //Ty_ty type;
     A_expList AST;
 };
+
+struct dlistAttrs {
+    //Ty_ty type;
+    A_decList AST;
+};
+
+struct decAttrs {
+    //Ty_ty type;
+    A_dec AST;
+};
 #include "tiger-grammar.tab.hpp"
 
 

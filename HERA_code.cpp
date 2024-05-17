@@ -30,9 +30,9 @@ int A_forExp_::stack_size_in_me()
 {
     return this->parent()->stack_size_in_me() + 2;
 }
-//int A_simpleVar_::stack_size_in_me() {
-//    return this->parent()->stack_size_in_me() + 1;
-//}
+int A_varDec_::stack_size_in_me() {
+    return this->parent()->stack_size_in_me() + 1;
+}
 
 int A_root_::stack_size_in_me()
 {
@@ -199,6 +199,7 @@ string A_forExp_::endLabel() { //ex
     return end_Label;
 }
 string A_forExp_::HERA_code() {
+    Ty_ty typeCheck = this->checkType();
     //st_vars_in_me();
     if (this->start_Label == "") {
         start_Label = "forLoopStart" + next_string();
@@ -223,17 +224,6 @@ string A_forExp_::HERA_code() {
     returnString += indent_math + "LABEL(" + endLabel() + ")\n";
     returnString += indent_math + "DEC( SP, 2)\n";
     return returnString;
-    //string returnString =  indent_math + "LABEL("+ "this->startLabel()" +")\n";
-    //returnString += _test->HERA_code();
-    //returnString +=  indent_math + "CMP(" + this->_test->result_reg_s() + ", R0 )\n";
-    //if zero/false end
-    //returnString +=  indent_math + "BZ(" + this->endLabel() + ")\n";
-    //body
-    //returnString += _body->HERA_code();
-    //go back to start
-    //returnString +=  indent_math + "BR(" + this->startLabel() + ")\n";
-   // returnString +=  indent_math + "LABEL("+ this->endLabel() +")\n";
-    //return returnString;
 }
 
 string A_forExp_::string_data() {
@@ -242,6 +232,7 @@ string A_forExp_::string_data() {
 }
 
 string A_varExp_::HERA_code() {
+    Ty_ty typeCheck = this->checkType();
     string returnString = _var->HERA_code();
     return returnString;
 }
@@ -250,6 +241,7 @@ string A_varExp_::string_data() {
     return returnString;
 }
 string A_simpleVar_::HERA_code() {
+    Ty_ty typeCheck = this->checkType();
     string returnString = indent_math + "LOAD(" + this->result_reg_s() + "," + std::to_string(getVarLocationInFrame()) + ", FP) \n";
     return returnString;
     //return "";
@@ -272,6 +264,7 @@ string A_whileExp_::startLabel() {
 }
 
 string A_whileExp_::HERA_code() {
+    Ty_ty typeCheck = this->checkType();
     string returnString =  indent_math + "LABEL("+ this->startLabel() +")\n";
     returnString += _test->HERA_code();
     returnString +=  indent_math + "CMP(" + this->_test->result_reg_s() + ", R0 )\n";
@@ -293,6 +286,7 @@ string A_whileExp_::string_data()
 
 string A_breakExp_::HERA_code()
 {
+    Ty_ty typeCheck = this->checkType();
     string returnString = "";
     if(this->amIInLoop() == false){
         EM_error("Not in loop", true);
@@ -523,6 +517,75 @@ string A_seqExp_::string_data()
         return "";
     }
     string returnString = this->_seq->string_data() + "\n";
+    return returnString;
+}
+string A_decList_::HERA_code()
+{
+    Ty_ty typeCheck = this->checkType();
+    string returnString = _head->HERA_code();
+    if(_head == nullptr){
+        return "";
+    }
+    if(_tail != nullptr){
+        returnString += indent_math + _tail->HERA_code();
+    }
+    return returnString;
+}
+string A_decList_::string_data()
+{
+    if(_head == nullptr){
+        return "";
+    }
+    string returnString = this->_head->string_data();
+    if(_tail != nullptr){
+        returnString += this->_tail->string_data();
+    }
+    return returnString;
+}
+
+string A_varDec_::HERA_code()
+{
+    Ty_ty typeCheck = this->checkType();
+    String returnString = "INC(SP, 1)\n";
+    returnString += indent_math + _init->HERA_code();
+    returnString += indent_math + "STORE(" + "R" + str(this->init_result_reg()) + "," + str(stack_size_in_me()) + ", FP) \n";
+
+    return returnString;
+}
+string A_varDec_::string_data()
+{
+    string returnString = this->_init->string_data();
+    return returnString;
+}
+
+string A_letExp_::HERA_code()
+{
+    Ty_ty typeCheck = this->checkType();
+
+    //String returnString = "INC(SP, 2)\n";
+    String returnString = _decs->HERA_code();
+    // in dec heracode like for exp ask parent about frame size leave it to decs to inc one each time returnString += indent_math + "STORE(" + str(_decs->init_result_reg()) + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+    returnString += _body->HERA_code();
+//    returnString += indent_math + "MOVE(" + this->result_reg_s() +"," + _hi-> result_reg_s() + ")\n";
+//    returnString += indent_math + "STORE(" + this->result_reg_s() + "," + str(stack_size_in_me() - 1) + ", FP) \n";
+//    returnString += indent_math + "LOAD(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";//reload lo as pernote in result reg it must be diffrent
+//    returnString += indent_math + "CMP(" + _lo->result_reg_s() + "," + this->result_reg_s() + ")\n";
+//    returnString += indent_math + "BG(" + endLabel() + ")\n";
+//    returnString += indent_math + "LABEL(" + start_Label + ")\n";
+//    returnString += indent_math + _body->HERA_code();
+//    returnString += indent_math + "LOAD(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+//    returnString += indent_math + "INC(" + _lo->result_reg_s() + ", 1)\n";
+//    returnString += indent_math + "STORE(" + _lo->result_reg_s() + "," + str(stack_size_in_me() - 2) + ", FP) \n";
+//    returnString += indent_math + "LOAD(" + this->result_reg_s() + "," + str(stack_size_in_me() - 1) + ", FP) \n";
+//    returnString += indent_math + "CMP(" + _lo->result_reg_s() + "," + this->result_reg_s() +")\n";
+//    returnString += indent_math + "BLE(" + start_Label + ")\n";
+//    returnString += indent_math + "LABEL(" + endLabel() + ")\n";
+    returnString += indent_math + "DEC( SP," + str(stack_size_in_me()) + ")\n"; //make method to count inc inn decs
+    return returnString;
+}
+string A_letExp_::string_data()
+{
+    string returnString = this->_body->string_data();
     return returnString;
 }
 

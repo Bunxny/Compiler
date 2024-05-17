@@ -200,11 +200,20 @@ ST<var_sym_info> A_forExp_::st_vars_in_me(AST_node_ *which_child) {
     } else if (which_child == _lo) {
         return this->parent()->st_vars_in_me(this);
     } else {
-        ST new_st = ST_example(std::pair(this->_var, var_sym_info(0, Ty_Int(), stack_size_in_me() - 2)));
+        ST new_st = ST_example(std::pair(this->_var, var_sym_info(0, Ty_Int(), this->stack_size_in_me() - 2)));
         new_st = MergeAndShadow(new_st, this->parent()->st_vars_in_me(this));
         return new_st;
     }
 }
+//ST<var_sym_info> A_varDec_::st_vars_in_me(AST_node_ *which_child) {
+//        ST new_st = ST_example(std::pair(this->_var, var_sym_info(0, Ty_Int(), this->stack_size_in_me() - 2)));
+//        new_st = MergeAndShadow(new_st, this->parent()->st_vars_in_me(this));
+//        return new_st;
+//}
+
+//ST<var_sym_info> A_letExp_::st_vars_in_me(AST_node_ *which_child) {
+//        return this->parent()->st_vars_in_me(this);
+//}
 
 
 ST<var_sym_info> AST_node_::st_vars_in_me(AST_node_ *which_child) {
@@ -284,16 +293,54 @@ Ty_ty A_expList_::checkType() {
     }
 }
 Ty_ty A_callExp_::checkType() {
-//    cout << "type of power is: " << to_String(type_of_power) << endl;
-//    cout << "is power a function? " << (type_of_power->kind == Ty_function ? "yes" : "no --- bother!") << endl;
-//    cout << "return type of power is: " << to_String(type_of_power->u.function.return_type) << endl;
-//    cout << "is type of power == Ty_Function( ... same stuff as before ...)? " <<
+    int parem = 0;
+    A_expList list = this->_args_or_null;
+    while ( list != nullptr){
+        parem++;
+        list = list->_tail_or_null;
+    }
+    list = this->_args_or_null;
+    if (parem == 3) {
+        if(this->_args_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->head->ty) {
+            EM_error("Error invalid parameter1 types");
+        }
+        else if(this->_args_or_null->_tail_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->tail->head->ty) {
+            EM_error("Error invalid parameter2 types");
+        } else if(this->_args_or_null->_tail_or_null->_tail_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->tail->tail->head->ty) {
+            EM_error("Error invalid parameter3 types");
+        }
+    } else if (parem == 2) {
+        if(this->_args_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->head->ty) {
+            EM_error("Error invalid parameter1 types");
+        }
+        else if(this->_args_or_null->_tail_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->tail->head->ty) {
+            EM_error("Error invalid parameter2 types");
+        }
+    } else if (parem == 1) {
+        if(this->_args_or_null->_head->checkType() != lookup(_func,callsDictionary).type->u.function.parameter_types->head->ty) {
+            EM_error("Error invalid parameter1 types");
+        }
+    } else if (parem == 0) {
+        if(Ty_Void() != lookup(_func,callsDictionary).type->u.function.parameter_types->head->ty) {
+            EM_error("Error invalid parameter0 types");
+        }
+}
     if (lookup(_func,callsDictionary).type->kind == Ty_function) {
         return lookup(_func,callsDictionary).type->u.function.return_type;
     } else {
         EM_error("Error:function types", true);
         return Ty_Error();
     }
+//    cout << "type of power is: " << to_String(type_of_power) << endl;
+//    cout << "is power a function? " << (type_of_power->kind == Ty_function ? "yes" : "no --- bother!") << endl;
+//    cout << "return type of power is: " << to_String(type_of_power->u.function.return_type) << endl;
+//    cout << "is type of power == Ty_Function( ... same stuff as before ...)? " <<
+//    if (lookup(_func,callsDictionary).type->kind == Ty_function) {
+//        return lookup(_func,callsDictionary).type->u.function.return_type;
+//    } else {
+//        EM_error("Error:function types", true);
+//        return Ty_Error();
+//    }
 //    if (Symbol_to_string(_func) == "mod" || Symbol_to_string(_func) == "div") {
 //        if (_args_or_null->checkType() != Ty_Int()) {
 //            EM_error("Error: mod and div need int types", true);
@@ -367,6 +414,29 @@ Ty_ty A_varExp_::checkType() {
 
 Ty_ty A_simpleVar_::checkType() {
     return Ty_Int();
+}
+
+Ty_ty A_letExp_::checkType() {
+    EM_error("Error:COMPILER HAS NOT MADE IT THIS FAR :(", true);
+    return _body->checkType();
+}
+
+Ty_ty A_decList_::checkType() {
+    if (this->_head == nullptr) {
+        EM_error("Error: Type check failed null exp list", true);
+        return Ty_Error();
+    } else if(this->_tail == nullptr) {
+        return this->_head->checkType();
+    } else {
+        A_decList hold = this->_tail;
+        while(hold->_tail != nullptr) {
+            hold = hold->_tail;
+        }
+        return hold->_head->checkType();
+    }
+}
+Ty_ty A_varDec_::checkType() {
+    return _init->checkType();
 }
 //       so I'm putting it here.
 

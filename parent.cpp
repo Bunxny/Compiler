@@ -106,6 +106,31 @@ void A_varExp_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_pare
     _var->set_parent_pointers_for_me_and_my_descendants(this);
 }
 
+void A_letExp_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
+{
+    stored_parent = my_parent_or_null_if_i_am_the_root;
+    _body->set_parent_pointers_for_me_and_my_descendants(this);
+    _decs->set_parent_pointers_for_me_and_my_descendants(this);
+}
+
+void A_decList_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
+{
+    // record my parent
+    stored_parent = my_parent_or_null_if_i_am_the_root;
+    // now, tell my childseqren to record me as theirs... they'll tell the grandkids
+    _head->set_parent_pointers_for_me_and_my_descendants(this);
+    if (_tail != nullptr) {
+        _tail->set_parent_pointers_for_me_and_my_descendants(this);
+    }
+}
+
+
+void A_varDec_::set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent_or_null_if_i_am_the_root)
+{
+    stored_parent = my_parent_or_null_if_i_am_the_root;
+    _init->set_parent_pointers_for_me_and_my_descendants(this);
+}
+
 
 
 

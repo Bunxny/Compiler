@@ -275,7 +275,7 @@ public:
     Ty_ty checkType() override;
     bool amIInLoop() override;
     string getEndLabel(AST_node_ *which_child) override;
-    int stack_size_in_me();
+    int stack_size_in_me() override;
     ST<var_sym_info> st_vars_in_me(AST_node_ *which_child) override;
     bool amIInFor() override;
 
@@ -415,6 +415,11 @@ class A_letExp_ : public A_exp_ {
 public:
 	A_letExp_(A_pos pos, A_decList decs, A_exp body);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
+    int init_result_reg() override;
+    string string_data() override;
+    Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	A_decList _decs;
 	A_exp _body;
@@ -491,7 +496,7 @@ public:
     Ty_ty checkType() override;
     string HERA_code() override;
     string string_data();
-    int stack_size_in_me();
+    int stack_size_in_me() override;
     bool amIInFor() override;
     ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
 private:
@@ -579,7 +584,7 @@ public:
 	A_exp _head;
 	A_expList _tail_or_null;
     A_exp last_elist_exp();
-    string HERA_code();
+    string HERA_code() override;
     int init_result_reg();
     string string_data() override;
     Ty_ty checkType() override;
@@ -610,12 +615,18 @@ private:
 class A_dec_ : public AST_node_ {
 public:
 	explicit A_dec_(A_pos p);
+    int init_result_reg();
 };
 
 class A_decList_ : public A_dec_ {
 public:
 	A_decList_(A_dec head, A_decList tail);
 	string print_rep(int indent, bool with_attributes) override;
+    string HERA_code() override;
+    int init_result_reg();
+    string string_data() override;
+    Ty_ty checkType() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
 private:
 	A_dec _head;
 	A_decList _tail;
@@ -625,6 +636,13 @@ class A_varDec_ : public A_dec_ {
 public:
 	A_varDec_(A_pos pos, Symbol var, Symbol typ, A_exp init);
 	string print_rep(int indent, bool with_attributes) override;
+    int init_result_reg();
+    string HERA_code() override;
+    string string_data() override;
+    Ty_ty checkType() override;
+    int stack_size_in_me() override;
+    void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
+    //ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
 private:
 	Symbol _var;
 	Symbol _typ;

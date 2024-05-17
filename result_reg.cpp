@@ -145,6 +145,28 @@ int A_simpleVar_::init_result_reg(){
     return 1;
 }
 
+int A_letExp_::init_result_reg(){
+    int d = 0;
+    if (_decs == nullptr) {
+       d = 0;
+    }
+    d = _decs->init_result_reg();
+    return std::max(d, _body->result_reg());
+}
+int A_dec_::init_result_reg(){
+    return this->init_result_reg(); //will call other methods to get things done
+}
+int A_varDec_::init_result_reg(){
+    return _init->result_reg(); //will call other methods to get things done
+}
+int A_decList_::init_result_reg(){
+    if(this->_tail != nullptr){
+        return std::max(this->_head->init_result_reg(), this->_tail->init_result_reg());
+    } else {
+        return this->_head->init_result_reg();
+    }
+}
+
 //int A_fieldVar_::init_result_reg(){
 //    return this->init_result_reg();
 //}

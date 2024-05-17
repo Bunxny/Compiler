@@ -68,7 +68,7 @@ class tigerParseDriver;
 // Next, the precedence rules; these can be from the list of tokens above,
 //  but with _ordered_sequence_ of %left/%right/%nonassoc steps,
 //  we define precedence (stickiness), with the "stickiest" (highest precedence) at the bottom of the list
-%left IF THEN WHILE DO
+%left IF THEN WHILE DO FOR LET
 %left ELSE
 %left OR
 %left AND
@@ -87,6 +87,8 @@ class tigerParseDriver;
 /* Attributes types for nonterminals are next, e.g. struct's from tigerParseDriver.h */
 %type <expAttrs>  exp
 %type <elistAttrs>  elist
+%type <dlistAttrs>  dlist
+%type <decAttrs>   dec
 
 
 
@@ -276,6 +278,13 @@ exp:  INT[i]					{ $$.AST = A_IntExp(Position::fromLex(@i), $i);
                                               //$$.type = Ty_Void();
         								      EM_debug("Got void expression.");
         								    }
+
+    | LET dlist[dlist1] IN elist[explist0] END_LET {
+                                                  $$.AST = A_LetExp(Position::undefined(), $dlist1.AST, A_SeqExp(Position::undefined(),$explist0.AST));
+                                                  //$$.type = Ty_Void();
+                                                  EM_debug("Got for expression", $$.AST->pos());
+                                        }
+
 elist:
         exp[exp1] SEMICOLON elist[elist1] {
                                 $$.AST = A_ExpList($exp1.AST, $elist1.AST);
@@ -284,8 +293,22 @@ elist:
         						}
         |exp[exp1] {            $$.AST = A_ExpList($exp1.AST, 0);
                                 //$$.type = $exp1.type;
-                                EM_debug("Got parenthesis expression.", $$.AST->pos());
+                                EM_debug("Got elist expression.", $$.AST->pos());
                                 }
+dec:
+        VAR ID[i] COLON ID[typ] ASSIGN exp[exp1] {
+                                 $$.AST = A_VarDec(Position::fromLex(@i), to_Symbol($i), to_Symbol($typ), $exp1.AST);;
+            					 EM_debug("Got dec expression.", $$.AST->pos());
+            	                }
+
+dlist:
+        dec[dec1] dlist[dlist1] {
+                                $$.AST = A_DecList($dec1.AST, $dlist1.AST);
+        					    EM_debug("Got expression dlist.", $$.AST->pos());
+        						}
+        |dec[dec1] {            $$.AST = A_DecList($dec1.AST, 0);
+                                EM_debug("Got dlist expression.", $$.AST->pos());
+                             }
 //
 // Note: In older compiler tools, instead of writing $exp1 and $exp2, we'd write $1 and $3,
 //        to refer to the first and third elements on the right-hand-side of the production.

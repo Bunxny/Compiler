@@ -10,10 +10,12 @@ using std::endl;
 #include "tigerParseDriver.h"
 
 #include "lazy.h"   // allow self-test of lazy-evaluation system
-
+// #define COMPILE_LEX_TEST 1
 /* Turned this off while having trouble switching to C++ approach; this used to work in C version */
 #if defined COMPILE_LEX_TEST
+#include "cmake-build-debug/tiger-grammar.tab.hpp"
 // array of token number / token name pairs
+#if defined COMPILE_LEX_TEST_WITH_NAMES
 static struct {
 	int number;
 	const char *name;
@@ -62,15 +64,19 @@ static struct {
 	{VAR, "VAR"},
 	{TYPE, "TYPE"}
 };
+#endif
 
 // function to convert token numbers to printable names
 String tokname(int tok) {
+	return "-";
+#if defined COMPILE_LEX_TEST_WITH_NAMES
 	for (unsigned int i = 0; i < sizeof(toknames)/sizeof(*toknames); i++)
 	{
 		if (toknames[i].number == tok)
 			return toknames[i].name;
 	}
 	return "BAD_TOKEN";
+#endif
 }
 
 
