@@ -627,6 +627,7 @@ public:
     string string_data() override;
     Ty_ty checkType() override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
+    ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
 private:
 	A_dec _head;
 	A_decList _tail;
@@ -642,7 +643,7 @@ public:
     Ty_ty checkType() override;
     int stack_size_in_me() override;
     void set_parent_pointers_for_me_and_my_descendants(AST_node_ *my_parent) override;
-    //ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
+    ST<var_sym_info> st_vars_in_me(AST_node_ *which_child);
 private:
 	Symbol _var;
 	Symbol _typ;

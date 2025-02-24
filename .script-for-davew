@@ -1,0 +1,1 @@
+./cmake-build-debug/tiger test.tig > test.hera && HERA-C-Run test.hera

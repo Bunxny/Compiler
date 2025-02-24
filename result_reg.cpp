@@ -157,7 +157,7 @@ int A_dec_::init_result_reg(){
     return this->init_result_reg(); //will call other methods to get things done
 }
 int A_varDec_::init_result_reg(){
-    return _init->result_reg(); //will call other methods to get things done
+    return _init->result_reg()+1; //will call other methods to get things done
 }
 int A_decList_::init_result_reg(){
     if(this->_tail != nullptr){

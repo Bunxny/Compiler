@@ -548,6 +548,7 @@ string A_varDec_::HERA_code()
     Ty_ty typeCheck = this->checkType();
     String returnString = "INC(SP, 1)\n";
     returnString += indent_math + _init->HERA_code();
+    returnString += indent_math + "MOVE(" + "R" + str(this->init_result_reg()) +"," + "R" + str(_init->result_reg()) + ")\n";
     returnString += indent_math + "STORE(" + "R" + str(this->init_result_reg()) + "," + str(stack_size_in_me()) + ", FP) \n";
 
     return returnString;
