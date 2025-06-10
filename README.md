@@ -14,6 +14,7 @@ The project implements elements of compiler design including:
 
 
 ## Project Structure:
+```
 ├── Documentation
 │   ├── AST_attributes.txt
 │   ├── sources.txt
@@ -50,8 +51,8 @@ The project implements elements of compiler design including:
 ├──symbol.h
 ├──test.hera
 ├──test.tig
-├──tiger-grammar.yy
-├──tiger-lex.ll
+├──tiger-grammar.yy  # identify and prioritize tokens
+├──tiger-lex.ll # 
 ├──tiger.cpp
 ├──tigerParseDriver.cpp
 ├──tigerParseDriver.h
@@ -60,6 +61,7 @@ The project implements elements of compiler design including:
 ├──types.cpp
 ├──types.h
 └── util.cpp
+```
 
 ## Limitations
 This was completed up to milstone 6. See milestones [here](https://docs.google.com/document/d/1WNeB8NJ1VvdgfXOVZiMSvajAKcltCRBuIbd7KEtPUfc/edit?tab=t.0)
