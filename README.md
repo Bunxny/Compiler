@@ -14,16 +14,52 @@ The project implements elements of compiler design including:
 
 
 ## Project Structure:
-Compiler/
--  AST.h / AST.cpp              # AST node definitions and implementations
-- ST.h / ST.cpp                # Symbol Table structures and logic
-- static_checks.h / .cpp       # Static semantic analysis routines
-- HERA_code.cpp                # Intermediate code generation
-- errormsg.h / .cpp            # Error handling utilities
-- layout_frames.cpp            # Stack frame layout logic
-- All_Tests.sh                 # Script to run all tests
-- CMakeLists.txt               # Build configuration
-- README.md                    # Project documentation
+├── Documentation
+│   ├── AST_attributes.txt
+│   ├── sources.txt
+│   └── User_Manuel.txt 
+├── Demo 
+│   └── demo.mp4
+├──.gitignore
+├──.script-for-dave
+├──AST-print-attributes.cpp
+├──AST-print.cpp
+├──AST.cpp # AST node definitions and implementations
+├──AST.h
+├──AST_appel.h
+├──AST_attribute_types.h
+├──All_Tests.sh # Script to run all tests
+├──CMakeLists.txt     # Build configuration
+├──HERA_code.cpp  # Intermediate code generation
+├──README.md    # Project documentation
+├──ST.cpp # Symbol Table structures and logic
+├──ST.h
+├──ST.t
+├──depth.cpp
+├──errormsg.cpp     # Error handling utilities
+├──errormsg.h
+├──height.cpp
+├──layout_frames.cpp   # Stack frame layout logic
+├──lazy.cpp
+├──lazy.h
+├──lazy.t
+├──parent.cpp
+├──result_reg.cpp
+├──static_checks.cpp # Static semantic analysis routines
+├──static_checks.h
+├──symbol.h
+├──test.hera
+├──test.tig
+├──tiger-grammar.yy
+├──tiger-lex.ll
+├──tiger.cpp
+├──tigerParseDriver.cpp
+├──tigerParseDriver.h
+├──typecheck.cpp
+├──typecheck.h
+├──types.cpp
+├──types.h
+└── util.cpp
 
 ## Limitations
 This was completed up to milstone 6. See milestones [here](https://docs.google.com/document/d/1WNeB8NJ1VvdgfXOVZiMSvajAKcltCRBuIbd7KEtPUfc/edit?tab=t.0)
@@ -34,7 +70,4 @@ This video demonstrates tests being run on our compiler by feeding it tiger-like
 The first few lines, labeled on the left with ‘line 1… line n’ is the text of the test.
 The HERA code generated is between #include <Tiger-stdlib-stack-data.hera> and #include <Tiger-stdlib-stack.hera>. The final contents of the registers are displayed under the line “Registers:”.
 
-<video width=”320” height=”240” controls>
-	<source src=”demo/demo.mp4” type=”video/mp4”>
-</video>
-
+https://github.com/user-attachments/assets/dec5a9f0-78cd-453d-8d15-bd9ef4cf5d5d
